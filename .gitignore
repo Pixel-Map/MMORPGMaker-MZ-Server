@@ -1,1 +1,17 @@
 node_modules/
+.idea/
+.builds/
+
+rethinkdb_data/
+save/
+server/admin_dev/bower_components/
+server/admin_dev/build/
+server/*.log
+server/package-lock.json
+server/tokens.json
+*.log
+
+tokens.json
+
+.DS_Store
+.env
