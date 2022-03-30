@@ -65,7 +65,7 @@ var fs = __importStar(require("fs"));
  *****************************/
 var GameData = /** @class */ (function () {
     function GameData() {
-        this.path = '../../../game/';
+        this.path = '../../' + process.env.GAME_PATH;
         this.loaded = false;
         this.data = {};
         this.reloadData();
