@@ -92,7 +92,7 @@ export default class Rpgmaker {
     }
 
     _tilesetFlags(mapId) {
-        const tileset = this.gameworld.tileSets[this.gameworld.getMapById(mapId)].tilesetId;
+        const tileset = this.gameworld.tileSets[this.gameworld.getMapById(mapId)]?.tilesetId;
         if (tileset) {
             return tileset.flags;
         } else {

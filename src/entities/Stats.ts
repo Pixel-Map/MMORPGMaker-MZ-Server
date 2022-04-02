@@ -1,5 +1,5 @@
 import { ArrayType, Entity, OneToOne, PrimaryKey, Property } from '@mikro-orm/core';
-import { User } from './User';
+import { Player } from './Player';
 
 @Entity()
 export class Stats {
@@ -10,8 +10,8 @@ export class Stats {
     @PrimaryKey()
     id!: number;
 
-    @OneToOne(() => User)
-    user: User;
+    @OneToOne(() => Player)
+    user: Player;
 
     @Property({ default: 1 })
     classId: number;

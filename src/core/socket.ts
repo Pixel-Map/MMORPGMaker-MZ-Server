@@ -1,8 +1,8 @@
 import MMO_Core from './mmo_core';
 
-const fs = require('fs');
+import fs from 'fs';
+import EventEmitter from 'events';
 const fsPromises = fs.promises;
-const EventEmitter = require('events');
 
 export default class Socket {
     public socketConnection: any;
@@ -35,7 +35,7 @@ export default class Socket {
             return err;
         }
         files = files.filter((fileName) => {
-            if (fileName.includes('.js')) {
+            if (fileName.includes('.ts')) {
                 return fileName;
             }
         });

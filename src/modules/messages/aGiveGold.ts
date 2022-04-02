@@ -38,20 +38,16 @@ exports.initialize = function (mmoCore: MMO_Core) {
         players[targetsName].playerData.stats.gold += parseInt(args[2]);
 
         // We save the new datas
-        database.savePlayer(
-            {
-                username: players[targetsName].playerData.username,
-                stats: players[targetsName].playerData.stats,
-            },
-            (e) => {
-                socket.modules.player.subs.player.refreshData(players[targetsName]);
-                socket.modules.messages.sendToPlayer(
-                    players[targetsName],
-                    'System',
-                    `${initiator.playerData.username} gave you ${args[2]} gold!`,
-                    'action',
-                );
-            },
+        await database.savePlayer({
+            username: players[targetsName].playerData.username,
+            stats: players[targetsName].playerData.stats,
+        });
+        socket.modules.player.subs.player.refreshData(players[targetsName]);
+        socket.modules.messages.sendToPlayer(
+            players[targetsName],
+            'System',
+            `${initiator.playerData.username} gave you ${args[2]} gold!`,
+            'action',
         );
     };
 };

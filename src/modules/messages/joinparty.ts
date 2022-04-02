@@ -19,7 +19,7 @@ exports.initialize = function (mmoCore: MMO_Core) {
         if (target === undefined) {
             return socket.modules.messages.sendToPlayer(initiator, 'System', 'Could not find the player.', 'error');
         }
-        if (target.playerData.isBusy === 'combat') {
+        if (target.playerData.status === 'combat') {
             return socket.modules.messages.sendToPlayer(
                 initiator,
                 'System',

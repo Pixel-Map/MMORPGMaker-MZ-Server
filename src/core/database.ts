@@ -1,6 +1,6 @@
 import { LoadStrategy, MikroORM, wrap } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { User } from '../entities/User';
+import { Player } from '../entities/Player';
 import { Skin } from '../entities/Skin';
 import { Stats } from '../entities/Stats';
 
@@ -35,28 +35,25 @@ export default class Database {
             password: process.env.DATABASE_PASSWORD,
             loadStrategy: LoadStrategy.JOINED,
             driverOptions: {
-                connection: { ssl: { rejectUnauthorized: false } },
+                connection: { ssl: false },
             },
         });
         // We check if the database exist
         const generator = this.orm.getSchemaGenerator();
-        // await generator.dropSchema();
-        // await generator.createSchema();
         await generator.updateSchema();
         console.log('[I] All good! Everything is ready for you 😘');
         console.log('[I] Database initialized with success');
     }
 
-    async getPlayers(callback) {
+    getPlayers() {
         const em = this.orm.em.fork();
-        const userRepository = em.getRepository(User);
-        const users = await userRepository.findAll();
-        return users;
+        const playerRepository = em.getRepository(Player);
+        return playerRepository.findAll();
     }
 
     async findUser(userDetails) {
         const em = this.orm.em.fork();
-        const userRepository = em.getRepository(User);
+        const userRepository = em.getRepository(Player);
         const user = await userRepository.find(
             { username: userDetails.username },
             {
@@ -68,17 +65,16 @@ export default class Database {
         return user[0];
     }
 
-    findUserById(userId, callback) {
+    async findUserById(userId) {
         const em = this.orm.em.fork();
-        const userRepository = em.getRepository(User);
-        userRepository.find({ id: userId }, { limit: 1 }).then(function (output) {
-            return callback(output);
-        });
+        const userRepository = em.getRepository(Player);
+        const users = await userRepository.find({ id: userId }, { limit: 1, populate: ['skin', 'stats'] });
+        return users[0];
     }
 
     async deleteUserById(userId, callback) {
         const em = this.orm.em.fork();
-        const userRepository = em.getRepository(User);
+        const userRepository = em.getRepository(Player);
         const user = await userRepository.find({ id: userId }, { limit: 1 });
         userRepository.removeAndFlush(user).then(function (output) {
             callback(output);
@@ -87,7 +83,7 @@ export default class Database {
 
     async registerUser(userDetails) {
         const em = this.orm.em.fork();
-        const userRepository = em.getRepository(User);
+        const userRepository = em.getRepository(Player);
 
         const skin = new Skin();
         const stats = new Stats();
@@ -101,19 +97,23 @@ export default class Database {
         userRepository.persistAndFlush(user);
     }
 
-    async savePlayer(playerData, callback) {
+    async savePlayer(playerData) {
         console.log('Saving playerdata: ' + playerData.username);
 
+        if (typeof playerData.status === 'boolean') {
+            throw new Error('E3333');
+        }
+
         const em = this.orm.em.fork();
-        const userRepository = em.getRepository(User);
+        const userRepository = em.getRepository(Player);
         const user = await userRepository.find({ username: playerData.username }, { limit: 1 });
         wrap(user[0]).assign(playerData, { em: em });
         userRepository.persistAndFlush(user[0]);
     }
 
-    async savePlayerById(playerData, callback) {
+    async savePlayerById(playerData) {
         const em = this.orm.em.fork();
-        const userRepository = em.getRepository(User);
+        const userRepository = em.getRepository(Player);
         const user = await userRepository.find({ id: playerData.id }, { limit: 1 });
         wrap(user[0]).assign(playerData, { em: em });
     }

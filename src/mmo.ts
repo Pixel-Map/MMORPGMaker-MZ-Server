@@ -1,14 +1,16 @@
-// const { socket } = require('./core/socket');
+require('dotenv').config();
+Error.stackTraceLimit = Infinity;
+
 import Server from 'socket.io';
 import MMO_Core from './core/mmo_core';
+import MapsRouter from './routes/maps';
+import express from 'express';
+import bodyParser from 'body-parser';
+import path from 'path';
 
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
+
 const app = express();
 const server = require('http').createServer(app);
-
 const io: Server = new Server(server);
 const mmoCore = MMO_Core.getInstance();
 /*****************************
@@ -34,6 +36,8 @@ app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
     next();
 });
+
+app.use('/api/map/', MapsRouter);
 
 console.log('######################################');
 console.log('# MMORPG Maker MV - Samuel Lespes Cardillo');
@@ -66,7 +70,7 @@ try {
 process.on('SIGINT', function () {
     const security = require('./core/security');
     console.log('Caught interrupt signal');
-    mmoCore.socket.modules.player.subs.auth.saveWorld();
+    if (mmoCore.socket.modules.player !== undefined) mmoCore.socket.modules.player.subs.auth.saveWorld();
     security.saveTokens(mmoCore.database);
     process.exit();
 });

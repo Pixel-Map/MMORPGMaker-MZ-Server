@@ -17,7 +17,7 @@ router.post('/signin', async function (req, res) {
 
     const user = await mmoCore.database.findUser(req.body);
     if (user === undefined) {
-        return res.status(500).send({ message: "User doesn't exist" });
+        return res.status(500).send({ message: "Player doesn't exist" });
     }
 
     // If password is incorrect.

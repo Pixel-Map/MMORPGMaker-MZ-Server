@@ -23,14 +23,8 @@ exports.initialize = function (mmoCore: MMO_Core) {
                 password: newPassword,
             };
 
-            database.savePlayer(payload, function () {
-                return socket.modules.messages.sendToPlayer(
-                    initiator,
-                    'System',
-                    'Password changed with success!',
-                    'action',
-                );
-            });
+            await database.savePlayer(payload);
+            socket.modules.messages.sendToPlayer(initiator, 'System', 'Password changed with success!', 'action');
         }
     };
 };

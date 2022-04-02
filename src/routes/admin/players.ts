@@ -8,40 +8,30 @@ const mmoCore = MMO_Core.getInstance();
  *****************************/
 
 // Send back the configurations of the server
-router.get('/:playerId?', isTokenValid, function (req, res) {
+router.get('/:playerId?', isTokenValid, async (req, res) => {
     if (!req.params.playerId) {
-        mmoCore.database.getPlayers((players) => {
-            res.status(200).send(players);
-        });
+        const players = await mmoCore.database.getPlayers();
+        res.status(200).send(players);
     } else {
-        mmoCore.database.findUserById(req.params.playerId, (player) => {
-            res.status(200).send(player);
-        });
+        const player = await mmoCore.database.findUserById(req.params.playerId);
+        res.status(200).send(player);
     }
 });
 
-router.patch('/', isTokenValid, (req, res) => {
+router.patch('/', isTokenValid, async (req, res) => {
     if (!req.body.username) {
         return;
     }
 
-    mmoCore.database.savePlayerById(req.body, () => {
-        res.status(200).send(true);
-    });
+    await mmoCore.database.savePlayerById(req.body);
+    res.status(200).send(true);
 });
 
 router.delete('/:playerId', isTokenValid, (req, res) => {
     if (!req.params.playerId) {
-        return;
+        return res.status(400).json({ error: 'Bad Request' });
     }
-
-    // mmoCore.database.deleteUser(req.params.playerId, () => {
-    //     res.status(200).send(true);
-    // });
+    return res.json({ success: true });
 });
-
-/*****************************
- FUNCTIONS
- *****************************/
 
 module.exports = router;

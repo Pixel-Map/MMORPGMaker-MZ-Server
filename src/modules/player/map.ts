@@ -84,10 +84,7 @@ exports.initialize = function (mmoCore: MMO_Core) {
 
             data.playerData.username = client.playerData.username; // Temporary way to pass the username
             data.playerData.skin = client.playerData.skin;
-            data.playerData.isBusy = client.playerData.isBusy;
-            console.log('MAP JOINED');
-            console.log(client.id);
-            console.log(data.playerData);
+            data.playerData.status = client.playerData.status;
             client.broadcast.to(data.id).emit('map_joined', {
                 id: client.id,
                 playerData: data.playerData,

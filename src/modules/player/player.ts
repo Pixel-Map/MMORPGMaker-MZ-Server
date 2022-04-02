@@ -66,9 +66,8 @@ exports.initialize = function (mmoCore: MMO_Core) {
                 return;
             }
             wrap(client.playerData.stats).assign({ ...payload }, { mergeObjects: true });
-            database.savePlayer(client.playerData, () => {
-                exports.refreshData(client);
-            });
+            await database.savePlayer(client.playerData);
+            exports.refreshData(client);
         });
 
         client.on('player_update_skin', function (payload) {
@@ -91,29 +90,23 @@ exports.initialize = function (mmoCore: MMO_Core) {
             }
         });
 
-        client.on('player_update_busy', function (payload) {
-            console.log('Update player busy');
+        client.on('player_update_status', async (payload) => {
             if (client.playerData === undefined) {
                 return;
             }
-            if (client.playerData.isBusy === payload) {
+            if (client.playerData.status === payload) {
                 return;
             }
 
-            client.playerData.isBusy = payload;
-            console.log(payload);
-            database.savePlayer(
-                {
-                    username: client.playerData.username,
-                    isBusy: client.playerData.isBusy,
-                },
-                (e) => {
-                    client.broadcast.to('map-' + client.playerData.mapId).emit('refresh_players_on_map', {
-                        playerId: client.id,
-                        playerData: client.playerData,
-                    });
-                },
-            );
+            client.playerData.status = payload;
+            await database.savePlayer({
+                username: client.playerData.username,
+                status: client.playerData.status,
+            });
+            client.broadcast.to('map-' + client.playerData.mapId).emit('refresh_players_on_map', {
+                playerId: client.id,
+                playerData: client.playerData,
+            });
         });
 
         client.on('player_moving', function (payload) {
@@ -182,17 +175,16 @@ exports.initialize = function (mmoCore: MMO_Core) {
         return io.sockets.connected[socketId];
     };
 
-    exports.refreshData = function (player) {
-        database.findUserById(player.playerData.id, (playerData) => {
-            delete playerData.password; // We delete the password from the result sent back
+    exports.refreshData = async (client) => {
+        const playerData = await database.findUserById(client.playerData.id);
+        delete playerData.password; // We delete the password from the result sent back
 
-            player.emit('refresh_player_data', playerData, () => {
-                if (!player.isInParty) {
-                    return;
-                }
+        client.emit('refresh_player_data', playerData, () => {
+            if (!client.isInParty) {
+                return;
+            }
 
-                socket.modules.player.subs.party.refreshPartyData(player.isInParty);
-            });
+            socket.modules.player.subs.party.refreshPartyData(client.isInParty);
         });
     };
 };

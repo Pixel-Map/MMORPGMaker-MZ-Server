@@ -173,15 +173,11 @@ exports.initialize = function (mmoCore: MMO_Core) {
             );
         }
 
-        database.savePlayer(
-            {
-                username: players[targetsName].playerData.username,
-                stats: players[targetsName].playerData.stats,
-                permission: players[targetsName].playerData.permission,
-            },
-            (e) => {
-                socket.modules.player.subs.player.refreshData(players[targetsName]);
-            },
-        );
+        await database.savePlayer({
+            username: players[targetsName].playerData.username,
+            stats: players[targetsName].playerData.stats,
+            permission: players[targetsName].playerData.permission,
+        });
+        socket.modules.player.subs.player.refreshData(players[targetsName]);
     };
 };

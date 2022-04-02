@@ -1,5 +1,5 @@
 import { Entity, OneToOne, PrimaryKey, Property } from '@mikro-orm/core';
-import { User } from './User';
+import { Player } from './Player';
 
 @Entity()
 export class Skin {
@@ -10,21 +10,21 @@ export class Skin {
     @PrimaryKey()
     id!: number;
 
-    @OneToOne(() => User)
-    user: User;
+    @OneToOne(() => Player)
+    user: Player;
 
-    @Property({ default: 'NPCizzleTest' })
+    @Property({ default: 'Actor1' })
     battlerName: string;
 
     @Property({ default: 0 })
     characterIndex: number;
 
-    @Property({ default: 'NPCizzleTest' })
+    @Property({ default: 'Actor1' })
     characterName: string;
 
     @Property({ default: 0 })
     faceIndex: number;
 
-    @Property({ default: 'NPCizzleTest' })
+    @Property({ default: 'Actor1' })
     faceName: string;
 }

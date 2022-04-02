@@ -4,8 +4,8 @@ import { Skin } from './Skin';
 import { Stats } from './Stats';
 
 @Entity()
-export class User {
-    public constructor(init?: Partial<User>) {
+export class Player {
+    public constructor(init?: Partial<Player>) {
         Object.assign(this, init);
     }
 
@@ -24,8 +24,8 @@ export class User {
     @Property({ default: 0 })
     y: number;
 
-    @Property({ default: false })
-    isBusy: boolean;
+    @Property({ nullable: true })
+    status: string;
 
     @Property({ default: 1 })
     mapId: number;

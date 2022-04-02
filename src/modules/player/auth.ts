@@ -28,7 +28,6 @@ exports.initialize = function (mmoCore: MMO_Core) {
                     if (existingPlayer !== null) {
                         return loginError(client, 'Player is already connected.');
                     }
-
                     return loginSuccess(client, user, mmoCore);
                 } else {
                     return loginError(client, 'Bad password!');
@@ -67,7 +66,7 @@ exports.initialize = function (mmoCore: MMO_Core) {
         });
 
         // Handle the disconnection of a player
-        client.on('disconnect', () => {
+        client.on('disconnect', async () => {
             if (client.lastMap === undefined) {
                 return;
             }
@@ -83,10 +82,9 @@ exports.initialize = function (mmoCore: MMO_Core) {
 
             security.createLog(`${client.playerData.username} disconnected from the game.`);
 
-            database.savePlayer(client.playerData, function (_) {
-                client.broadcast.to(client.lastMap).emit('map_exited', client.id);
-                client.leave(client.lastMap);
-            });
+            await database.savePlayer(client.playerData);
+            client.broadcast.to(client.lastMap).emit('map_exited', client.id);
+            client.leave(client.lastMap);
         });
     });
 };
@@ -109,7 +107,7 @@ function loginSuccess(client, details, mmoCore: MMO_Core) {
     const security = require('../../core/security');
     // We remove the things we don't want the user to see
     delete details.password;
-    details.isBusy = false;
+    details.status = null;
 
     // Then we continue
     client.emit('login_success', { msg: details });
