@@ -7,13 +7,16 @@ import * as fs from 'fs';
 export default class GameData {
     private path = '../../' + process.env.GAME_PATH;
     public loaded = false;
-    public data = {};
+    public data = {
+        Actors: undefined,
+    };
 
     constructor() {
-        this.reloadData();
-        console.log(`[I] ${Object.keys(this.data).length} game files loaded.`);
-        console.log('[I] Game data initialized with success.');
-        this.loaded = true;
+        this.reloadData().then((r) => {
+            console.log(`[I] ${Object.keys(this.data).length} game files loaded.`);
+            console.log('[I] Game data initialized with success.');
+            this.loaded = true;
+        });
     }
 
     // Reload the game files data
@@ -32,7 +35,7 @@ export default class GameData {
                     const fileName = file.name.split('.json')[0];
 
                     if (file.name.includes('.json')) {
-                        const fileData = await fs.readFileSync(`${correctedPath}/${file.name}`, { encoding: 'utf-8' });
+                        const fileData = fs.readFileSync(`${correctedPath}/${file.name}`, { encoding: 'utf-8' });
                         this.data[fileName] = JSON.parse(fileData);
                     }
                 }

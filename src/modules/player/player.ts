@@ -1,158 +1,176 @@
 import MMO_Core from '../../core/mmo_core';
 import { wrap } from '@mikro-orm/core';
+import Socket from '../../core/socket';
+import { Auth } from './auth';
+import { Map } from './map';
+import { Party } from './party';
 
-exports.initialize = function (mmoCore: MMO_Core) {
-    const { socket, database } = mmoCore;
-    const gameworld = mmoCore.gameworld;
-    const io = socket.socketConnection;
+export class Player {
+    auth: Auth;
+    map: Map;
+    party: Party;
+    mmoCore: MMO_Core;
+    socket: Socket;
 
-    io.on('connect', function (client) {
-        client.on('player_update_switches', function (payload) {
-            if (client.playerData === undefined) {
-                return;
-            }
+    constructor(mmoCore: MMO_Core) {
+        // Initialize Children
+        this.auth = new Auth(mmoCore);
+        this.map = new Map(mmoCore);
+        this.party = new Party(mmoCore);
 
-            client.playerData.switches = payload;
-        });
+        this.mmoCore = mmoCore;
+        const { socket, database } = mmoCore;
+        this.socket = socket;
+        const gameworld = mmoCore.gameworld;
+        const io = socket.socketConnection;
 
-        client.on('player_global_switch_check', function (payload) {
-            if (client.playerData === undefined) {
-                return;
-            }
-
-            // If the player is in a party
-            if (client.isInParty) {
-                if (database.SERVER_CONFIG.partySwitches[payload.switchId] !== undefined) {
-                    io.in(client.isInParty).emit('player_update_switch', payload);
+        io.on('connect', (client) => {
+            client.on('player_update_switches', function (payload) {
+                if (client.playerData === undefined) {
                     return;
                 }
-            }
 
-            if (database.SERVER_CONFIG.globalSwitches[payload.switchId] === undefined) {
-                return;
-            }
-
-            database.SERVER_CONFIG.globalSwitches[payload.switchId] = payload.value;
-            database.saveConfig();
-
-            client.broadcast.emit('player_update_switch', payload);
-        });
-
-        client.on('player_update_variables', function (payload) {
-            if (client.playerData === undefined) {
-                return;
-            }
-
-            client.playerData.variables = payload;
-        });
-
-        client.on('player_global_variables_check', function (payload) {
-            if (client.playerData === undefined) {
-                return;
-            }
-
-            if (database.SERVER_CONFIG.globalVariables[payload.variableId] === undefined) {
-                return;
-            }
-
-            database.SERVER_CONFIG.globalVariables[payload.variableId] = payload.value;
-            database.saveConfig();
-
-            client.broadcast.emit('player_update_variable', payload);
-        });
-
-        client.on('player_update_stats', async function (payload) {
-            if (client.playerData === undefined) {
-                return;
-            }
-            wrap(client.playerData.stats).assign({ ...payload }, { mergeObjects: true });
-            await database.savePlayer(client.playerData);
-            exports.refreshData(client);
-        });
-
-        client.on('player_update_skin', function (payload) {
-            if (client.playerData === undefined) {
-                return;
-            }
-
-            switch (payload.type) {
-                case 'sprite':
-                    client.playerData.skin.characterName = payload.characterName;
-                    client.playerData.skin.characterIndex = payload.characterIndex;
-                    break;
-                case 'face':
-                    client.playerData.skin.faceName = payload.faceName;
-                    client.playerData.skin.faceIndex = payload.faceIndex;
-                    break;
-                case 'battler':
-                    client.playerData.skin.battlerName = payload.battlerName;
-                    break;
-            }
-        });
-
-        client.on('player_update_status', async (payload) => {
-            if (client.playerData === undefined) {
-                return;
-            }
-            if (client.playerData.status === payload) {
-                return;
-            }
-
-            client.playerData.status = payload;
-            await database.savePlayer({
-                username: client.playerData.username,
-                status: client.playerData.status,
-            });
-            client.broadcast.to('map-' + client.playerData.mapId).emit('refresh_players_on_map', {
-                playerId: client.id,
-                playerData: client.playerData,
-            });
-        });
-
-        client.on('player_moving', function (payload) {
-            if (client.playerData === undefined) {
-                return;
-            }
-
-            if (database.SERVER_CONFIG.offlineMaps[client.lastMap] !== undefined) {
-                return false;
-            }
-
-            payload.id = client.id;
-
-            client.playerData.x = payload.x;
-            client.playerData.y = payload.y;
-            client.playerData.mapId = payload.mapId;
-
-            gameworld.mutateNode(gameworld.getNodeBy('playerId', client.playerData.id), {
-                x: client.playerData.x,
-                y: client.playerData.y,
-                mapId: client.playerData.mapId,
+                client.playerData.switches = payload;
             });
 
-            client.broadcast.to(client.lastMap).emit('player_moving', payload);
-        });
+            client.on('player_global_switch_check', (payload) => {
+                if (client.playerData === undefined) {
+                    return;
+                }
 
-        client.on('player_dead', function () {
-            if (client.playerData === undefined) {
-                return;
-            }
+                // If the player is in a party
+                if (client.isInParty) {
+                    if (database.SERVER_CONFIG.partySwitches[payload.switchId] !== undefined) {
+                        io.in(client.isInParty).emit('player_update_switch', payload);
+                        return;
+                    }
+                }
 
-            client.emit('player_respawn', {
-                mapId: database.SERVER_CONFIG.newPlayerDetails.mapId,
-                x: database.SERVER_CONFIG.newPlayerDetails.x,
-                y: database.SERVER_CONFIG.newPlayerDetails.y,
+                if (database.SERVER_CONFIG.globalSwitches[payload.switchId] === undefined) {
+                    return;
+                }
+
+                database.SERVER_CONFIG.globalSwitches[payload.switchId] = payload.value;
+                database.saveConfig();
+
+                client.broadcast.emit('player_update_switch', payload);
+            });
+
+            client.on('player_update_variables', function (payload) {
+                if (client.playerData === undefined) {
+                    return;
+                }
+
+                client.playerData.variables = payload;
+            });
+
+            client.on('player_global_variables_check', function (payload) {
+                if (client.playerData === undefined) {
+                    return;
+                }
+
+                if (database.SERVER_CONFIG.globalVariables[payload.variableId] === undefined) {
+                    return;
+                }
+
+                database.SERVER_CONFIG.globalVariables[payload.variableId] = payload.value;
+                database.saveConfig();
+
+                client.broadcast.emit('player_update_variable', payload);
+            });
+
+            client.on('player_update_stats', async (payload) => {
+                if (client.playerData === undefined) {
+                    return;
+                }
+                wrap(client.playerData.stats).assign({ ...payload }, { mergeObjects: true });
+                await database.savePlayer(client.playerData);
+                await this.refreshData(client);
+            });
+
+            client.on('player_update_skin', function (payload) {
+                if (client.playerData === undefined) {
+                    return;
+                }
+
+                switch (payload.type) {
+                    case 'sprite':
+                        client.playerData.skin.characterName = payload.characterName;
+                        client.playerData.skin.characterIndex = payload.characterIndex;
+                        break;
+                    case 'face':
+                        client.playerData.skin.faceName = payload.faceName;
+                        client.playerData.skin.faceIndex = payload.faceIndex;
+                        break;
+                    case 'battler':
+                        client.playerData.skin.battlerName = payload.battlerName;
+                        break;
+                }
+            });
+
+            client.on('player_update_status', async (payload) => {
+                if (client.playerData === undefined) {
+                    return;
+                }
+                if (client.playerData.status === payload) {
+                    return;
+                }
+
+                client.playerData.status = payload;
+                await database.savePlayer({
+                    username: client.playerData.username,
+                    status: client.playerData.status,
+                });
+                client.broadcast.to('map-' + client.playerData.mapId).emit('refresh_players_on_map', {
+                    playerId: client.id,
+                    playerData: client.playerData,
+                });
+            });
+
+            client.on('player_moving', function (payload) {
+                if (client.playerData === undefined) {
+                    return;
+                }
+
+                if (database.SERVER_CONFIG.offlineMaps[client.lastMap] !== undefined) {
+                    return false;
+                }
+
+                payload.id = client.id;
+
+                client.playerData.x = payload.x;
+                client.playerData.y = payload.y;
+                client.playerData.mapId = payload.mapId;
+
+                gameworld.mutateNode(gameworld.getNodeBy('playerId', client.playerData.id), {
+                    x: client.playerData.x,
+                    y: client.playerData.y,
+                    mapId: client.playerData.mapId,
+                });
+
+                client.broadcast.to(client.lastMap).emit('player_moving', payload);
+            });
+
+            client.on('player_dead', function () {
+                if (client.playerData === undefined) {
+                    return;
+                }
+
+                client.emit('player_respawn', {
+                    mapId: database.SERVER_CONFIG.newPlayerDetails.mapId,
+                    x: database.SERVER_CONFIG.newPlayerDetails.x,
+                    y: database.SERVER_CONFIG.newPlayerDetails.y,
+                });
             });
         });
-    });
-
+    }
     // ---------------------------------------
     // ---------- EXPOSED FUNCTIONS
     // ---------------------------------------
 
-    exports.getPlayers = async function (spaceName) {
+    async getPlayers(spaceName) {
         spaceName = spaceName || false;
-        const sockets = await socket.getConnectedSockets(spaceName);
+        const sockets = await this.socket.getConnectedSockets(spaceName);
         const players = {};
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -164,27 +182,27 @@ exports.initialize = function (mmoCore: MMO_Core) {
             players[sockets[i].playerData.username.toLowerCase()] = sockets[i];
         }
         return players;
-    };
+    }
 
-    exports.getPlayer = async function (username) {
-        const players = await exports.getPlayers();
+    async getPlayer(username) {
+        const players = await this.getPlayers(false);
         return players[username.toLowerCase()] || null;
-    };
+    }
 
-    exports.getPlayerById = async function (socketId) {
-        return io.sockets.connected[socketId];
-    };
+    async getPlayerById(socketId) {
+        return this.socket.socketConnection.sockets.connected[socketId];
+    }
 
-    exports.refreshData = async (client) => {
-        const playerData = await database.findUserById(client.playerData.id);
+    async refreshData(player) {
+        const playerData = await this.mmoCore.database.findUserById(player.playerData.id);
         delete playerData.password; // We delete the password from the result sent back
 
-        client.emit('refresh_player_data', playerData, () => {
-            if (!client.isInParty) {
+        player.emit('refresh_player_data', playerData, () => {
+            if (!player.isInParty) {
                 return;
             }
 
-            socket.modules.player.subs.party.refreshPartyData(client.isInParty);
+            this.socket.modules.player.party.refreshPartyData(player.isInParty);
         });
-    };
-};
+    }
+}

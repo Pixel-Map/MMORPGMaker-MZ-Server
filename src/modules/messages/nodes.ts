@@ -1,11 +1,18 @@
 import MMO_Core from '../../core/mmo_core';
+import { Messages } from './messages';
 
-exports.initialize = function (mmoCore: MMO_Core) {
-    const { socket } = mmoCore;
-    const gameworld = mmoCore.gameworld;
-    exports.use = async function (args, initiator) {
+export class Nodes {
+    mmoCore: MMO_Core;
+    messages: Messages;
+
+    constructor(messages: Messages) {
+        this.mmoCore = messages.mmoCore;
+        this.messages = messages;
+    }
+
+    async use(args, initiator) {
         if (initiator.playerData.permission < 100) {
-            return socket.modules.messages.sendToPlayer(
+            return this.messages.sendToPlayer(
                 initiator,
                 'System',
                 "You don't have the permission to use this command.",
@@ -13,14 +20,14 @@ exports.initialize = function (mmoCore: MMO_Core) {
             );
         }
         if (args.length < 1) {
-            return socket.modules.messages.sendToPlayer(initiator, 'System', 'Not enough arguments.', 'error');
+            return this.messages.sendToPlayer(initiator, 'System', 'Not enough arguments.', 'error');
         }
-        if (!gameworld.getSummonMap()) {
-            return socket.modules.messages.sendToPlayer(initiator, 'System', 'The server has no spawnMap.', 'error');
+        if (!this.mmoCore.gameworld.getSummonMap()) {
+            return this.messages.sendToPlayer(initiator, 'System', 'The server has no spawnMap.', 'error');
         }
 
-        const _print = (string) => socket.modules.messages.sendToPlayer(initiator, 'System', string, 'action');
-        const nodes = await gameworld.nodes;
+        const _print = (string) => this.messages.sendToPlayer(initiator, 'System', string, 'action');
+        const nodes = this.mmoCore.gameworld.nodes;
         if (nodes && nodes.length) {
             _print('/nodes = (coordinates, id) =>');
             console.log('/nodes => [');
@@ -34,5 +41,5 @@ exports.initialize = function (mmoCore: MMO_Core) {
             }
             console.log(']');
         } else Error('/nodes = (coordinates, id) => NONE');
-    };
-};
+    }
+}

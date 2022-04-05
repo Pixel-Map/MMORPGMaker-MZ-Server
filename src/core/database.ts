@@ -25,6 +25,15 @@ export default class Database {
     };
 
     async initialize() {
+        let connectionOptions: any = {};
+
+        if (process.env.DATABASE_SSL == 'true') {
+            connectionOptions = { ssl: { rejectUnauthorized: false } };
+        } else {
+            connectionOptions = {
+                ssl: false,
+            };
+        }
         this.orm = await MikroORM.init<PostgreSqlDriver>({
             entities: ['./build/entities'], // path to our JS entities (dist), relative to `baseDir`
             entitiesTs: ['./src/entities'], // path to our TS entities (src), relative to `baseDir`
@@ -35,7 +44,7 @@ export default class Database {
             password: process.env.DATABASE_PASSWORD,
             loadStrategy: LoadStrategy.JOINED,
             driverOptions: {
-                connection: { ssl: false },
+                connection: connectionOptions,
             },
         });
         // We check if the database exist

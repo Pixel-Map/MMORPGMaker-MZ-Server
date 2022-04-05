@@ -1,16 +1,25 @@
 import MMO_Core from '../../core/mmo_core';
+import Socket from '../../core/socket';
+import { Messages } from './messages';
 
-exports.initialize = function (mmoCore: MMO_Core) {
-    const { socket } = mmoCore;
-    exports.use = async function (args, player) {
+export class W {
+    mmoCore: MMO_Core;
+    messages: Messages;
+
+    constructor(messages: Messages) {
+        this.mmoCore = messages.mmoCore;
+        this.messages = messages;
+    }
+
+    async use(args, player) {
         if (args.length <= 2) {
-            return socket.modules.messages.sendToPlayer(player, 'System', 'Not enough arguments.', 'error');
+            return this.messages.sendToPlayer(player, 'System', 'Not enough arguments.', 'error');
         }
 
-        const players = await socket.modules.player.subs.player.getPlayers();
+        const players = await this.mmoCore.socket.modules.player.getPlayers(false);
         const targetsName = args[1].toLowerCase();
         if (players[targetsName] === undefined) {
-            return socket.modules.messages.sendToPlayer(player, 'System', 'Could not find the player.', 'error');
+            return this.messages.sendToPlayer(player, 'System', 'Could not find the player.', 'error');
         }
 
         let message = '';
@@ -18,12 +27,7 @@ exports.initialize = function (mmoCore: MMO_Core) {
             message = message + ' ' + args[i];
         }
 
-        socket.modules.messages.sendToPlayer(player, '(Whisp) ' + player.playerData.username, message, 'whisper');
-        socket.modules.messages.sendToPlayer(
-            players[targetsName],
-            '(Whisp) ' + player.playerData.username,
-            message,
-            'whisper',
-        );
-    };
-};
+        this.messages.sendToPlayer(player, '(Whisp) ' + player.playerData.username, message, 'whisper');
+        this.messages.sendToPlayer(players[targetsName], '(Whisp) ' + player.playerData.username, message, 'whisper');
+    }
+}

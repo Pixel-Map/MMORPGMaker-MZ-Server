@@ -1,13 +1,21 @@
 import MMO_Core from '../../core/mmo_core';
+import { Messages } from './messages';
 
-exports.initialize = function (mmoCore: MMO_Core) {
-    const { socket } = mmoCore;
-    exports.use = async function (args, player) {
+export class Pa {
+    mmoCore: MMO_Core;
+    messages: Messages;
+
+    constructor(messages: Messages) {
+        this.mmoCore = messages.mmoCore;
+        this.messages = messages;
+    }
+
+    async use(args, player) {
         if (args.length <= 1) {
-            return socket.modules.messages.sendToPlayer(player, 'System', 'Not enough arguments.', 'error');
+            return this.messages.sendToPlayer(player, 'System', 'Not enough arguments.', 'error');
         }
         if (player.isInParty === false) {
-            return socket.modules.messages.sendToPlayer(player, 'System', 'You are not in a party.', 'error');
+            return this.messages.sendToPlayer(player, 'System', 'You are not in a party.', 'error');
         }
 
         let message = '';
@@ -17,6 +25,6 @@ exports.initialize = function (mmoCore: MMO_Core) {
             message = message + ' ' + args[i];
         }
 
-        socket.modules.messages.sendToParty(playerName, '(Party) ' + player.playerData.username, message);
-    };
-};
+        this.messages.sendToParty(playerName, '(Party) ' + player.playerData.username, message);
+    }
+}

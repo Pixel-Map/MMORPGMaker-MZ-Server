@@ -8,7 +8,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
 
-
 const app = express();
 const server = require('http').createServer(app);
 const io: Server = new Server(server);
@@ -63,14 +62,14 @@ try {
     });
 } catch (err) {
     console.log(err);
-    mmoCore.socket.modules.player.subs.auth.saveWorld();
+    mmoCore.socket.modules.player.auth.saveWorld();
     server.instance.close();
 }
 
 process.on('SIGINT', function () {
     const security = require('./core/security');
     console.log('Caught interrupt signal');
-    if (mmoCore.socket.modules.player !== undefined) mmoCore.socket.modules.player.subs.auth.saveWorld();
-    security.saveTokens(mmoCore.database);
+    if (mmoCore.socket.modules.player !== undefined) mmoCore.socket.modules.player.auth.saveWorld();
+    security.saveTokens();
     process.exit();
 });

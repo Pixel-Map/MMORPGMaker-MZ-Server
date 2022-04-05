@@ -29,7 +29,6 @@ export default class GameWorld {
     private rpgmaker;
 
     initialize(mmoCore: MMO_Core) {
-        mmoCore = MMO_Core.getInstance();
         this.socket = mmoCore.socket;
 
         this.gamedata = mmoCore.gamedata;

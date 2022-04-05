@@ -1,10 +1,21 @@
 import MMO_Core from '../../core/mmo_core';
+import { Messages } from './messages';
 
-exports.initialize = function (mmoCore: MMO_Core) {
-    const { socket, database } = mmoCore;
-    exports.use = async function (args, player) {
+export class World {
+    mmoCore: MMO_Core;
+
+    constructor(messages: Messages) {
+        this.mmoCore = messages.mmoCore;
+    }
+
+    async use(args, player) {
         if (args.length <= 1) {
-            return socket.modules.messages.sendToPlayer(player, 'System', 'Not enough arguments.', 'error');
+            return this.mmoCore.socket.modules.messages.sendToPlayer(
+                player,
+                'System',
+                'Not enough arguments.',
+                'error',
+            );
         }
 
         let message = '';
@@ -12,6 +23,6 @@ exports.initialize = function (mmoCore: MMO_Core) {
             message = message + ' ' + args[i];
         }
 
-        socket.modules.messages.sendToAll('(World) ' + player.playerData.username, message, 'global');
-    };
-};
+        this.mmoCore.socket.modules.messages.sendToAll('(World) ' + player.playerData.username, message, 'global');
+    }
+}

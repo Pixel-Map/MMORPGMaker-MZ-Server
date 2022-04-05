@@ -1,13 +1,21 @@
 import MMO_Core from '../../core/mmo_core';
+import { Messages } from './messages';
 
-exports.initialize = function (mmoCore: MMO_Core) {
-    const { socket } = mmoCore;
-    exports.use = async function (args, initiator) {
+export class Kick {
+    mmoCore: MMO_Core;
+    messages: Messages;
+
+    constructor(messages: Messages) {
+        this.mmoCore = messages.mmoCore;
+        this.messages = messages;
+    }
+
+    async use(args, initiator) {
         if (args.length <= 1) {
-            return socket.modules.messages.sendToPlayer(initiator, 'System', 'Not enough arguments.', 'error');
+            return this.messages.sendToPlayer(initiator, 'System', 'Not enough arguments.', 'error');
         }
         if (initiator.playerData.permission < 50) {
-            return socket.modules.messages.sendToPlayer(
+            return this.messages.sendToPlayer(
                 initiator,
                 'System',
                 "You don't have the permission to kick a player.",
@@ -15,14 +23,14 @@ exports.initialize = function (mmoCore: MMO_Core) {
             );
         }
 
-        const players = await socket.modules.player.subs.player.getPlayers();
+        const players = await this.mmoCore.socket.modules.player.getPlayers(false);
         const targetsName = args[1].toLowerCase();
 
         if (players[targetsName] === undefined) {
-            return socket.modules.messages.sendToPlayer(initiator, 'System', 'Could not find the player.', 'error');
+            return this.messages.sendToPlayer(initiator, 'System', 'Could not find the player.', 'error');
         }
 
-        socket.modules.messages.sendToAll('System', `${players[targetsName].playerData.username} was kicked!`, 'error');
+        this.messages.sendToAll('System', `${players[targetsName].playerData.username} was kicked!`, 'error');
         return players[targetsName].disconnect();
-    };
-};
+    }
+}

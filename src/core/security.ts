@@ -17,7 +17,7 @@ const securityDetails = {
 // 1 : No debug
 // 2 : Only in console
 // 3 : Console + File writing
-exports.debugVerbose = 3;
+export const debugVerbose = 3;
 
 // Middleware to ensure that token is valid
 // Its in a variable in order be used as a global function
@@ -45,7 +45,7 @@ export function isTokenValid(req, res, next) {
             if (activeTokens[decoded.email][k].token !== token) {
                 continue;
             }
-            activeTokens[decoded.email][k].lastAccessed = new Date(); // We update the last accessed value with actual date
+            activeTokens[decoded.email][k].lastAccessed = new Date(); // We update the last accessed value with date
             tokenExist = true; // If the token is found, then we turn this variable to true
         }
 
@@ -64,9 +64,9 @@ export function isTokenValid(req, res, next) {
     });
 }
 
-exports.generateToken = function (requestDetails, userDetails, callback) {
+export function generateToken(requestDetails, userDetails, callback) {
     const error = false;
-    const generatedToken = jwt.sign(userDetails, securityDetails.tokenPassphrase, { expiresIn: '1d' }); // We generate the token
+    const generatedToken = jwt.sign(userDetails, securityDetails.tokenPassphrase, { expiresIn: '1d' }); // gen the token
 
     if (activeTokens[requestDetails.body.email] === undefined) {
         activeTokens[requestDetails.body.email] = [];
@@ -85,9 +85,9 @@ exports.generateToken = function (requestDetails, userDetails, callback) {
     });
 
     return callback(error, userDetails);
-};
+}
 
-exports.loadTokens = () => {
+export function loadTokens() {
     fs.readFile('./tokens.json', (err, data) => {
         if (err) {
             // eslint-disable-next-line no-return-assign
@@ -96,9 +96,9 @@ exports.loadTokens = () => {
         activeTokens = JSON.parse(data.toString());
         console.log('[I] ' + Object.keys(JSON.parse(data.toString())).length + ' active JWT loaded from local file!');
     });
-};
+}
 
-exports.saveTokens = () => {
+export function saveTokens() {
     fs.writeFile('./tokens.json', JSON.stringify(activeTokens), (err) => {
         if (err) {
             return console.log(err);
@@ -106,14 +106,14 @@ exports.saveTokens = () => {
 
         console.log('[I] Active JWT saved in local file.');
     });
-};
+}
 
 // Hash the password using SHA256 algorithm /w a salt 🔐
-exports.hashPassword = function (password) {
+export function hashPassword(password) {
     return crypto.createHmac('sha256', securityDetails.specialSalt).update(password).digest('hex');
-};
+}
 
-exports.generatePassword = function (length) {
+export function generatePassword(length) {
     length = length || 10;
     const string = 'abcdefghijklmnopqrstuvwxyz'; // to upper
     const numeric = '0123456789';
@@ -133,10 +133,10 @@ exports.generatePassword = function (length) {
         password = character;
     }
     return password;
-};
+}
 
-exports.createLog = function (message, type) {
-    if (exports.debugVerbose <= 1 || !message) {
+export function createLog(message, type = 'info') {
+    if (debugVerbose <= 1 || !message) {
         return;
     }
 
@@ -148,7 +148,7 @@ exports.createLog = function (message, type) {
         console.log(message);
     }
 
-    if (exports.debugVerbose >= 3) {
+    if (debugVerbose >= 3) {
         const fullDate = new Date();
         const todayDate = `${fullDate.getFullYear()}-${fullDate.getMonth()}-${fullDate.getDate()}`;
 
@@ -158,4 +158,4 @@ exports.createLog = function (message, type) {
             }
         });
     }
-};
+}
