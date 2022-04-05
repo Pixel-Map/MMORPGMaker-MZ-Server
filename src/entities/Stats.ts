@@ -28,8 +28,8 @@ export class Stats {
     @Property({ default: 1 })
     level: number;
 
-    @Property({ default: 3 })
-    items: number;
+    @Property({ type: 'json', default: '{}' })
+    items: JSON;
 
     @Property({ default: 0 })
     gold: number;

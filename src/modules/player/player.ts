@@ -83,6 +83,7 @@ export class Player {
                 if (client.playerData === undefined) {
                     return;
                 }
+                console.log(payload);
                 wrap(client.playerData.stats).assign({ ...payload }, { mergeObjects: true });
                 await database.savePlayer(client.playerData);
                 await this.refreshData(client);
