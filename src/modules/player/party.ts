@@ -75,7 +75,7 @@ export class Party {
              * party_player_action_fight
              */
             player.on('party_player_action_fight', async (action) => {
-                console.log('party_player_action_fight');
+                this.mmoCore.logger.debug('party_player_action_fight');
                 if (
                     !player.isInParty ||
                     !this.combat[player.isInParty] ||
@@ -109,7 +109,7 @@ export class Party {
             });
 
             player.on('party_player_estimate_fight', (results) => {
-                console.log('party_player_estimate_fight');
+                this.mmoCore.logger.debug('party_player_estimate_fight');
                 for (const k in this.combat[player.isInParty][player.playerData.mapId].members) {
                     this.combat[player.isInParty][player.playerData.mapId].members[k].emit(
                         'party_player_action_fight',
@@ -119,7 +119,7 @@ export class Party {
             });
 
             player.on('party_player_end_fight', () => {
-                console.log('party_player_end_fight');
+                this.mmoCore.logger.debug('party_player_end_fight');
                 if (!player.isInParty) {
                 }
                 if (!this.combat[player.isInParty]) {

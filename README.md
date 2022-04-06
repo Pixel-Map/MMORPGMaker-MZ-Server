@@ -97,6 +97,13 @@ Visit the official repo! https://github.com/Andaroth/MMORPGMaker-MZ
 - In-game chat
 - Registration page
 
+
+### Logging
+The server utilizes [PinoJS](https://github.com/pinojs/pino) to streamline logging.  By default, output is colorized to
+STDOUT, as well as output as JSON to a dated file.  To adjust the log level, just set the environment variable "PINO_LOG_LEVEL" to
+the desired level (from most to least verbose -- "trace", "debug", "info", "warn", "error", and "fatal").
+
+
 ---
 
 This repack includes Creative Commons graphics by : 

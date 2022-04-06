@@ -38,10 +38,10 @@ app.use(function (req, res, next) {
 
 app.use('/api/map/', MapsRouter);
 
-console.log('######################################');
-console.log('# MMORPG Maker MV - Samuel Lespes Cardillo');
-console.log('# Check GitHub for updates');
-console.log('######################################');
+mmoCore.logger.info('######################################');
+mmoCore.logger.info('# MMORPG Maker MV - Samuel Lespes Cardillo');
+mmoCore.logger.info('# Check GitHub for updates');
+mmoCore.logger.info('######################################');
 
 try {
     // Core
@@ -52,7 +52,7 @@ try {
     // Initializing server config
     const port = process.env.PORT ? process.env.PORT : 8097;
     server.listen(port); // Listen configured port
-    console.log('Listening on port: ' + port);
+    mmoCore.logger.info('Listening on port: ' + port);
     mmoCore.socket.initialize(io, mmoCore).then(() => {
         // Initalizing the socket-side of the server
         routes.initialize(app, mmoCore.database.SERVER_CONFIG, () => {
@@ -61,14 +61,14 @@ try {
         });
     });
 } catch (err) {
-    console.log(err);
+    mmoCore.logger.error(err);
     mmoCore.socket.modules.player.auth.saveWorld();
     server.instance.close();
 }
 
 process.on('SIGINT', function () {
     const security = require('./core/security');
-    console.log('Caught interrupt signal');
+    mmoCore.logger.info('Caught interrupt signal');
     if (mmoCore.socket.modules.player !== undefined) mmoCore.socket.modules.player.auth.saveWorld();
     security.saveTokens();
     process.exit();

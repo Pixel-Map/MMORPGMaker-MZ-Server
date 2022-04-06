@@ -53,7 +53,7 @@ export class Npc {
             const idList = this.mmoCore.gameworld.spawnedUniqueIds;
             if (idList && idList.length) {
                 _print('/npc = (index, coordinates, uniqueId) =>');
-                console.log('/npc => [');
+                this.mmoCore.logger.info('/npc => [');
                 for (const index in idList) {
                     const _npc = this.mmoCore.gameworld.getNpcByUniqueId(idList[index]);
                     if (_npc) {
@@ -61,10 +61,9 @@ export class Npc {
                         const x = _npc.x;
                         const y = _npc.y;
                         _print(`[${index}] (${mapId},${x},${y}) ${idList[index]}`);
-                        console.log(_npc);
+                        this.mmoCore.logger.trace(_npc);
                     }
                 }
-                console.log(']');
             } else _error('/npc = (index, coordinates, uniqueId) => NONE');
         }
     }

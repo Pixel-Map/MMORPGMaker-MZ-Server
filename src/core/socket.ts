@@ -24,7 +24,7 @@ export default class Socket {
             banks: new Banks(mmoCore),
             messages: new Messages(mmoCore),
         };
-        console.log(`[I] Socket.IO server started on port ${process.env.PORT ? process.env.PORT : 8097}...`);
+        mmoCore.logger.info(`[I] Socket.IO server started on port ${process.env.PORT ? process.env.PORT : 8097}...`);
     }
 
     // Return all connected sockets to the world or specific room (map-* OR party-*)

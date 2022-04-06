@@ -26,7 +26,6 @@ export class Auth {
                 if (user == undefined) {
                     return this.loginError(client, 'Account does not exist');
                 } else {
-                    console.log(user.password + ' vs. ' + security.hashPassword(data.password.toLowerCase()));
                     if (security.hashPassword(data.password.toLowerCase()) == user.password.toLowerCase()) {
                         const existingPlayer = await mmoCore.socket.modules.player.getPlayer(data.username);
                         if (existingPlayer !== null) {
@@ -84,7 +83,7 @@ export class Auth {
                 delete client.playerData.isInCombat; // Sanitizing
                 // client.playerData.isInCombat = false;
 
-                security.createLog(`${client.playerData.username} disconnected from the game.`, 'info');
+                mmoCore.logger.info(`${client.playerData.username} disconnected from the game.`, 'info');
 
                 await database.savePlayer(client.playerData);
                 client.broadcast.to(client.lastMap).emit('map_exited', client.id);
@@ -107,7 +106,6 @@ export class Auth {
 
     // Connecting the player and storing datas locally
     loginSuccess(client, details, mmoCore: MMO_Core) {
-        const security = require('../../core/security');
         // We remove the things we don't want the user to see
         delete details.password;
         details.status = null;
@@ -116,7 +114,7 @@ export class Auth {
         client.emit('login_success', { msg: details });
         client.playerData = details;
         mmoCore.gameworld.attachNode(client.playerData, true);
-        security.createLog(client.playerData.username + ' connected to the game');
+        mmoCore.logger.info(client.playerData.username + ' connected to the game');
     }
 
     // Sending error in case of failure at login

@@ -1,4 +1,6 @@
 import MMO_Core from './mmo_core';
+import pino from 'pino';
+import Logger = pino.Logger;
 
 /*****************************
  GAME WORLD by Axel Fiolle
@@ -27,6 +29,11 @@ export default class GameWorld {
     private socket;
     private gamedata;
     private rpgmaker;
+    private logger: Logger;
+
+    constructor(logger: Logger) {
+        this.logger = logger;
+    }
 
     initialize(mmoCore: MMO_Core) {
         this.socket = mmoCore.socket;
@@ -34,12 +41,12 @@ export default class GameWorld {
         this.gamedata = mmoCore.gamedata;
         this.rpgmaker = mmoCore.rpgmaker;
 
-        console.log('######################################');
-        console.log('[WORLD] GAME WORLD by Axel Fiolle');
+        this.logger.info('######################################');
+        this.logger.info('[WORLD] GAME WORLD by Axel Fiolle');
         this.fetchTilesets(); // Load collision informations
         this.fetchMaps(); // Load gamedata maps
-        console.log('[WORLD] GAME WORLD is ready !');
-        console.log('######################################');
+        this.logger.info('[WORLD] GAME WORLD is ready !');
+        this.logger.info('######################################');
     }
 
     // Global helpers
@@ -82,7 +89,7 @@ export default class GameWorld {
 
     // NPC helpers
     removeNpc(uniqueId) {
-        this.getNpcByUniqueId(uniqueId) ? GameWorld.removeConnectedNpc(uniqueId) : null;
+        this.getNpcByUniqueId(uniqueId) ? this.removeConnectedNpc(uniqueId) : null;
     }
 
     getNpcMapId(uniqueId) {
@@ -114,7 +121,7 @@ export default class GameWorld {
 
     fetchTilesets() {
         this.tileSets = this.gamedata.data['Tilesets'] || [];
-        console.log('[WORLD] Loaded Tilesets');
+        this.logger.info('[WORLD] Loaded Tilesets');
     }
 
     /*************************************************************************************** Nodes Operations */
@@ -199,7 +206,7 @@ export default class GameWorld {
     /*************************************************************************************** Maps Operations */
 
     fetchMaps = () => {
-        console.log('[WORLD] Loading world maps');
+        this.logger.info('[WORLD] Loading world maps');
         this.gameMaps = [];
         // use the file name as key in the loop, keeping only filename starting with "Map" :
         for (const fileName of Object.keys(this.gamedata.data).filter(
@@ -209,7 +216,7 @@ export default class GameWorld {
             const _gameMap = this.getMapFromGameData(this.gamedata.data[fileName], fileName);
             const _isSummon = _gameMap.isSummonMap;
             const _isSync = this.isMapInstanceable(_gameMap);
-            console.log(
+            this.logger.info(
                 `[WORLD] ... ${fileName} ${_isSummon ? '<Summon>' : ''}${
                     this.isMapInstanceable(_gameMap) ? '<Sync>' : ''
                 }`,
@@ -259,7 +266,7 @@ export default class GameWorld {
             const _makeInstance = this.makeInstance(_map, playerId);
             this.instancedMaps.push(_makeInstance);
             this.attachNode(_makeInstance);
-            console.log('[WORLD] # Started instance', _makeInstance.uniqueId, {
+            this.logger.info('[WORLD] # Started instance', _makeInstance.uniqueId, {
                 // Output useful informations
                 uniqueId: _makeInstance.uniqueId,
                 initiator: _makeInstance.initiator,
@@ -288,7 +295,7 @@ export default class GameWorld {
             Object.keys(this.instancedMaps[index]).map((key) => delete this.instancedMaps[index][key]);
             Object.assign(this.instancedMaps[index], _cleanedInstance); // Assign cleaned instance in state
             this.removeNode(_node);
-            console.log('[WORLD] # Killed instance', _cleanedInstance.uniqueId, this.instancedMaps[index]);
+            this.logger.info('[WORLD] # Killed instance', _cleanedInstance.uniqueId, this.instancedMaps[index]);
         }
     };
 
@@ -298,7 +305,7 @@ export default class GameWorld {
         if (this.getInstanceByMapId(mapId).paused) this.startInstanceLifecycle(mapId); // If paused, restart
         if (!this.getInstanceByMapId(mapId)['playersOnMap'].includes(playerId)) {
             this.getInstanceByMapId(mapId).playersOnMap.push(playerId); // Add playerId to Array
-            console.log('[WORLD] playerJoinInstance', this.getInstanceByMapId(mapId).uniqueId);
+            this.logger.info('[WORLD] playerJoinInstance', this.getInstanceByMapId(mapId).uniqueId);
         }
     };
 
@@ -308,7 +315,7 @@ export default class GameWorld {
             const _players = this.getInstanceByMapId(mapId).playersOnMap;
             // Remove playerId from Array
             this.getInstanceByMapId(mapId).playersOnMap.splice(_players.indexOf(playerId), 1);
-            console.log(
+            this.logger.info(
                 '[WORLD] playerLeaveInstance',
                 mapId,
                 JSON.stringify(this.getInstanceByMapId(mapId).playersOnMap),
@@ -333,7 +340,7 @@ export default class GameWorld {
             if (_generatedNpc && this.isConnectableNpc(_generatedNpc)) {
                 this.getConnectedNpcs(map.mapId).push(_generatedNpc);
                 this.attachNode(_generatedNpc);
-                console.log('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.mapId);
+                this.logger.info('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.mapId);
             }
         }
     };
@@ -463,14 +470,14 @@ export default class GameWorld {
         if (_spawnedIndex != -1) this.spawnedUniqueIds.splice(_spawnedIndex, 1, ''); // replace item with empty str to keep spawned index
         this.removeNode(_node);
 
-        console.log(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`);
+        this.logger.debug(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`);
         this.socket.emitToAll('npcRemove', { uniqueId });
         return uniqueId;
     };
 
     npcMoveStraight = (npc, direction, animSkip = false) => {
         if (!npc || !this.getNpcByUniqueId(npc.uniqueId)) return;
-        // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, {direction});
+        this.logger.trace('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x, y: npc.y }, { direction });
         if (this.rpgmaker._canPass(npc, direction)) {
             const _map = this.getNpcInstance(npc.uniqueId);
             this.getNpcByUniqueId(npc.uniqueId).x = this.rpgmaker._roundXWithDirection(_map.mapId, npc.x, direction);
@@ -490,10 +497,10 @@ export default class GameWorld {
                 y: this.getNpcByUniqueId(npc.uniqueId).y,
                 skip: animSkip,
             });
-            /* console.log('[WORLD] npcMoveStraight (2/2)', npc.uniqueId, {
-      x: world.getNpcByUniqueId(npc.uniqueId).x,
-      y: world.getNpcByUniqueId(npc.uniqueId).y
-    }); */
+            this.logger.trace('[WORLD] npcMoveStraight (2/2)', npc.uniqueId, {
+                x: this.getNpcByUniqueId(npc.uniqueId).x,
+                y: this.getNpcByUniqueId(npc.uniqueId).y,
+            });
             return true;
         } else return false;
     };
@@ -555,7 +562,11 @@ export default class GameWorld {
             const didMove = this.npcMoveRandom(this.getNpcByUniqueId(npc.uniqueId));
             if (didMove) {
                 this.getNpcByUniqueId(npc.uniqueId).lastMoveTime = new Date();
-                // console.log('[WORLD] handleNpcTurn', npc.uniqueId, world.getNpcByUniqueId(npc.uniqueId).lastMoveTime);
+                this.logger.trace(
+                    '[WORLD] handleNpcTurn',
+                    npc.uniqueId,
+                    this.getNpcByUniqueId(npc.uniqueId).lastMoveTime,
+                );
             }
         }
     };
@@ -634,7 +645,7 @@ export default class GameWorld {
     };
 
     mapTileFinder = (mapId, x, y) => {
-        // console.log('mapTileFinder', mapId, x, y);
+        this.logger.trace('mapTileFinder', mapId, x, y);
         return this.getInstanceByMapId(mapId).allTiles[x][y];
     };
 
@@ -651,8 +662,8 @@ export default class GameWorld {
         }
     };
 
-    private static removeConnectedNpc(uniqueId) {
-        console.log('I do not exist!  Please implement me');
+    private removeConnectedNpc(uniqueId) {
+        this.logger.warn('I do not exist!  Please implement me');
         return null;
     }
 }
