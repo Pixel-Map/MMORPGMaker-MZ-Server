@@ -1,6 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { Map } from './Map';
+import { Encounter } from './Encounter';
 
 interface EventPageConditionInterface {
     actorId: number;
@@ -75,6 +76,6 @@ export class RpgEvent {
     @Property({ type: 'json' })
     data: EventInterface;
 
-    @ManyToOne()
+    @ManyToOne(() => Map)
     map: Map;
 }
