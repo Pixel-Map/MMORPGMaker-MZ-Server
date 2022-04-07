@@ -3,10 +3,15 @@ import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Player } from '../entities/Player';
 import { Skin } from '../entities/Skin';
 import { Stats } from '../entities/Stats';
-
+import pino from 'pino';
+import Logger = pino.Logger;
 const security = require('./security');
 
 export default class Database {
+    logger: Logger;
+    constructor(logger: Logger) {
+        this.logger = logger;
+    }
     private orm: MikroORM;
     public SERVER_CONFIG = {
         newPlayerDetails: {
@@ -50,8 +55,8 @@ export default class Database {
         // We check if the database exist
         const generator = this.orm.getSchemaGenerator();
         await generator.updateSchema();
-        console.log('[I] All good! Everything is ready for you 😘');
-        console.log('[I] Database initialized with success');
+        this.logger.info('[I] All good! Everything is ready for you 😘');
+        this.logger.info('[I] Database initialized with success');
     }
 
     getPlayers() {
@@ -107,7 +112,7 @@ export default class Database {
     }
 
     async savePlayer(playerData) {
-        console.log('Saving playerdata: ' + playerData.username);
+        this.logger.info('Saving playerdata: ' + playerData.username);
 
         if (typeof playerData.status === 'boolean') {
             throw new Error('E3333');

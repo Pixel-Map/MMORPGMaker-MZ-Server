@@ -1,5 +1,6 @@
 import * as fs from 'fs';
-
+import pino from 'pino';
+import Logger = pino.Logger;
 /*****************************
  PUBLIC FUNCTIONS
  *****************************/
@@ -10,11 +11,12 @@ export default class GameData {
     public data = {
         Actors: undefined,
     };
-
-    constructor() {
+    logger: Logger;
+    constructor(logger: Logger) {
+        this.logger = logger;
         this.reloadData().then((r) => {
-            console.log(`[I] ${Object.keys(this.data).length} game files loaded.`);
-            console.log('[I] Game data initialized with success.');
+            logger.info(`[I] ${Object.keys(this.data).length} game files loaded.`);
+            logger.info('[I] Game data initialized with success.');
             this.loaded = true;
         });
     }
@@ -26,7 +28,7 @@ export default class GameData {
             const stats = fs.statSync(`${correctedPath}`);
 
             if (!stats.isDirectory()) {
-                return console.log("[O] Data folder doesn't seems to exist.");
+                return this.logger.info("[O] Data folder doesn't seems to exist.");
             }
 
             const files = fs.readdirSync(correctedPath, { withFileTypes: true });
@@ -41,25 +43,25 @@ export default class GameData {
                 }
             }
         } catch (e) {
-            console.log(e);
-            return console.log('[O] Could not find game data directory.');
+            this.logger.error(e);
+            return this.logger.error('[O] Could not find game data directory.');
         }
     }
 
     // Save the data back to the game files
     saveData(dataName) {
         if (this.data[dataName] === undefined) {
-            return console.log("[O] Data doesn't seems to exist.");
+            return this.logger.error("[O] Data doesn't seems to exist.");
         }
 
         const correctedPath = `${__dirname}/${this.path}data`;
 
         fs.writeFile(`${correctedPath}/${dataName}.json`, JSON.stringify(this.data[dataName]), function (err) {
             if (err) {
-                return console.log(`[O] Error while saving ${dataName}`);
+                return this.logger.error(`[O] Error while saving ${dataName}`);
             }
 
-            console.log(`[I] ${dataName} was saved with success.`);
+            this.logger.info(`[I] ${dataName} was saved with success.`);
         });
     }
 }

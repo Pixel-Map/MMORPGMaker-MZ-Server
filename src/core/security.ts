@@ -101,7 +101,7 @@ export function loadTokens() {
 export function saveTokens() {
     fs.writeFile('./tokens.json', JSON.stringify(activeTokens), (err) => {
         if (err) {
-            return console.log(err);
+            return console.error(err);
         }
 
         console.log('[I] Active JWT saved in local file.');
@@ -133,29 +133,4 @@ export function generatePassword(length) {
         password = character;
     }
     return password;
-}
-
-export function createLog(message, type = 'info') {
-    if (debugVerbose <= 1 || !message) {
-        return;
-    }
-
-    if (type === 'error') {
-        console.error(message);
-    } else if (type === 'warn') {
-        console.warn(message);
-    } else {
-        console.log(message);
-    }
-
-    if (debugVerbose >= 3) {
-        const fullDate = new Date();
-        const todayDate = `${fullDate.getFullYear()}-${fullDate.getMonth()}-${fullDate.getDate()}`;
-
-        fs.appendFile(`${todayDate}.log`, `${fullDate.toISOString()} : ${message}\r\n`, function (err) {
-            if (err) {
-                throw err;
-            }
-        });
-    }
 }

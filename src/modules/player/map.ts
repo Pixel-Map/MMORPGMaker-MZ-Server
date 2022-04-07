@@ -1,7 +1,5 @@
 import MMO_Core from '../../core/mmo_core';
 
-import * as security from '../../core/security';
-
 export class Map {
     mmoCore: MMO_Core;
 
@@ -11,9 +9,9 @@ export class Map {
         const gameworld = mmoCore.gameworld;
         const io = socket.socketConnection;
 
-        io.on('connect', function (client) {
+        io.on('connect', (client) => {
             // Handle players joining a map
-            client.on('map_joined', async function (playerData) {
+            client.on('map_joined', async (playerData) => {
                 if (client.playerData === undefined) {
                     return;
                 }
@@ -25,7 +23,7 @@ export class Map {
                     client.leave(client.lastMap);
                     gameworld.playerLeaveInstance(client.playerData.id, parseInt(client.playerData.mapId));
 
-                    security.createLog(client.playerData.username + ' left ' + client.lastMap);
+                    this.mmoCore.logger.debug(client.playerData.username + ' left ' + client.lastMap);
                 }
 
                 playerData.username = client.playerData.username; // Temporary way to pass the username
@@ -72,11 +70,11 @@ export class Map {
                     });
                 }
 
-                security.createLog(client.playerData.username + ' joined ' + client.lastMap);
+                this.mmoCore.logger.info(client.playerData.username + ' joined ' + client.lastMap);
             });
 
             // Refresh position of players when map joined
-            client.on('refresh_players_position', function (data) {
+            client.on('refresh_players_position', (data) => {
                 if (client.playerData === undefined) {
                     return;
                 }
@@ -85,7 +83,7 @@ export class Map {
                     return false;
                 }
 
-                security.createLog(client.playerData.username + ' transmitted its position to ' + data.id);
+                this.mmoCore.logger.debug(client.playerData.username + ' transmitted its position to ' + data.id);
 
                 data.playerData.username = client.playerData.username; // Temporary way to pass the username
                 data.playerData.skin = client.playerData.skin;

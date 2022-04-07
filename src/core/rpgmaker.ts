@@ -2,12 +2,14 @@
  RPG Maker Core Mock by Axel Fiolle
  *****************************/
 import GameWorld from './gameworld';
-
+import pino from 'pino';
+import Logger = pino.Logger;
 export default class Rpgmaker {
     private gameworld: GameWorld;
-
-    constructor(gameworld: GameWorld) {
+    private logger: Logger;
+    constructor(gameworld: GameWorld, logger: Logger) {
         this.gameworld = gameworld;
+        this.logger = logger;
     }
 
     _canPass(initiator, direction) {
@@ -20,13 +22,19 @@ export default class Rpgmaker {
         const x2 = this._roundXWithDirection(_mapId, _coords.x, direction);
         const y2 = this._roundYWithDirection(_mapId, _coords.y, direction);
         if (!this._isValid(_mapId, _coords.x, _coords.y) || !this._isValid(_mapId, x2, y2)) {
-            // console.log(initiator.uniqueId, '!maker._isValid(_mapId, x2, y2)', _mapId, x2, y2)
+            this.logger.trace(initiator.uniqueId, '!maker._isValid(_mapId, x2, y2)', _mapId, x2, y2);
             return false;
         }
         if (initiator._through) return true;
         if (!this._isMapPassable(_mapId, _coords.x, _coords.y, direction)) {
-            // console.log(initiator.uniqueId, '!maker._isMapPassable(_mapId, _coords.x, _coords.y, direction)',
-            // _mapId, _coords.x, _coords.y, direction)
+            this.logger.trace(
+                initiator.uniqueId,
+                '!maker._isMapPassable(_mapId, _coords.x, _coords.y, direction)',
+                _mapId,
+                _coords.x,
+                _coords.y,
+                direction,
+            );
             return false;
         }
         return !this._isCollidedWithCharacters(_mapId, x2, y2, initiator);
