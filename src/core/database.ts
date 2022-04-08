@@ -44,7 +44,13 @@ export default class Database {
             entitiesTs: ['./src/entities'], // path to our TS entities (src), relative to `baseDir`
             dbName: process.env.DATABASE_NAME,
             host: process.env.DATABASE_HOST,
-            type: 'postgresql',
+            type: process.env.DATABASE_TYPE as
+                | 'mongo'
+                | 'mysql'
+                | 'mariadb'
+                | 'postgresql'
+                | 'sqlite'
+                | 'better-sqlite',
             user: process.env.DATABASE_USERNAME,
             password: process.env.DATABASE_PASSWORD,
             loadStrategy: LoadStrategy.JOINED,
@@ -273,5 +279,9 @@ export default class Database {
         //     .finally(() => {
         //         conn.close();
         //     });
+    }
+
+    close() {
+        this.orm.close(true);
     }
 }
