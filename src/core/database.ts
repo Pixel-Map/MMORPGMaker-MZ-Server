@@ -128,7 +128,6 @@ export default class Database {
         const userRepository = em.getRepository(Player);
         const user = await userRepository.find({ username: playerData.username }, { limit: 1 });
         wrap(user[0]).assign(playerData, { em: em });
-        console.log(user[0]);
         userRepository.persistAndFlush(user[0]);
     }
 
