@@ -51,7 +51,7 @@ try {
     // Initializing the database
     // Initializing server config
     const port = process.env.PORT ? process.env.PORT : 8097;
-    server.listen(port); // Listen configured port
+    server.listen(port, '0.0.0.0'); // Listen configured port
     mmoCore.logger.info('Listening on port: ' + port);
     mmoCore.socket.initialize(io, mmoCore).then(() => {
         // Initalizing the socket-side of the server
