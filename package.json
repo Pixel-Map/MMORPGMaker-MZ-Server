@@ -54,6 +54,7 @@
     },
     "devDependencies": {
         "@mikro-orm/sqlite": "^5.1.1",
+        "@vscode/sqlite3": "^5.0.8",
         "@types/jest": "^27.4.1",
         "@types/node": "^17.0.22",
         "@types/socket.io": "^3.0.2",
