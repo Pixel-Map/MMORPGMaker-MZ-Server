@@ -42,7 +42,7 @@
         }
     },
     "engines": {
-        "node": "17.x"
+        "node": "v17.x"
     },
     "scripts": {
         "lint": "eslint .",
