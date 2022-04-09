@@ -46,8 +46,9 @@
     },
     "scripts": {
         "lint": "eslint .",
-        "build": "echo \"No need 😁! Just run 'start'\"",
-        "start": "ts-node src/mmo.ts",
+        "build": "tsc",
+        "start": "node build/mmo.js",
+        "tsnode": "ts-node src/mmo.ts",
         "dev": "nodemon src/mmo.ts",
         "test": "jest"
     },
@@ -55,7 +56,6 @@
         "@mikro-orm/sqlite": "^5.1.1",
         "@types/jest": "^27.4.1",
         "@types/node": "^17.0.22",
-        "@types/pino-multi-stream": "^5.1.3",
         "@types/socket.io": "^3.0.2",
         "@typescript-eslint/parser": "^5.17.0",
         "jest": "^27.5.1",
