@@ -27,7 +27,8 @@
         "transform": {
             "^.+\\.(ts|tsx)?$": "ts-jest",
             "^.+\\.(js|jsx)$": "babel-jest"
-        }
+        },
+        "testPathIgnorePatterns": ["dist"]
     },
     "engines": {
         "node": "v17.x"
@@ -35,7 +36,7 @@
     "scripts": {
         "lint": "eslint .",
         "build": "tsc",
-        "start": "node build/mmo.js",
+        "start": "node dist/mmo.js",
         "tsnode": "ts-node src/mmo.ts",
         "dev": "nodemon src/mmo.ts",
         "test": "jest"
@@ -66,7 +67,7 @@
         "useTsNode": true,
         "configPaths": [
             "./src/mikro-orm.config.ts",
-            "./build/mikro-orm.config.js"
+            "./dist/mikro-orm.config.js"
         ]
     }
 }

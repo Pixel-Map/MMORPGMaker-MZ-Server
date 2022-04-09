@@ -21,9 +21,8 @@ describe('User authentication', () => {
             mmoCore.database.initialize().then(() => {
                 mmoCore.socket.initialize(io, mmoCore).then(() => {
                     // Initalizing the socket-side of the server
-
                     // Initializing the RESTFUL API
-                    mmoCore.gameworld.initialize(mmoCore); // Initializing world environment
+                    // mmoCore.gameworld.initialize(mmoCore); // Initializing world environment
                 });
                 const port = httpServer.address().port;
                 clientSocket = new Client(`http://localhost:${port}`);
@@ -75,9 +74,9 @@ describe('User authentication', () => {
     test('should NOT allow a user to re-register with same login name', (done) => {
         clientSocket.emit('register', { username: 'testuser', password: 'testpassword' });
         clientSocket.on('login_error', (response) => {
-            done();
             expect(response.msg).toBe('Cannot create this account.');
         });
+        done();
     });
 
     afterAll(() => {

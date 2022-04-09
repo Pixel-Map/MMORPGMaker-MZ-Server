@@ -40,7 +40,7 @@ export default class Database {
             };
         }
         this.orm = await MikroORM.init<PostgreSqlDriver>({
-            entities: ['./build/entities'], // path to our JS entities (dist), relative to `baseDir`
+            entities: ['./dist/entities'], // path to our JS entities (dist), relative to `baseDir`
             entitiesTs: ['./src/entities'], // path to our TS entities (src), relative to `baseDir`
             dbName: process.env.DATABASE_NAME,
             host: process.env.DATABASE_HOST,
