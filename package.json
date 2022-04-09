@@ -30,7 +30,7 @@
         }
     },
     "engines": {
-        "node": "14.x"
+        "node": "v17.x"
     },
     "scripts": {
         "lint": "eslint .",
@@ -41,7 +41,12 @@
         "test": "jest"
     },
     "devDependencies": {
+        "@mikro-orm/cli": "^5.1.1",
+        "@mikro-orm/sqlite": "^5.1.1",
+        "@types/jest": "^27.4.1",
+        "@types/node": "^17.0.22",
         "@typescript-eslint/eslint-plugin": "^5.16.0",
+        "@typescript-eslint/parser": "^5.17.0",
         "eslint": "^7.0.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-config-standard": "^14.1.1",
@@ -50,14 +55,9 @@
         "eslint-plugin-prettier": "^4.0.0",
         "eslint-plugin-promise": "^4.2.1",
         "eslint-plugin-standard": "^4.0.1",
-        "prettier": "^2.6.0",
-        "@mikro-orm/cli": "^5.1.1",
-        "@mikro-orm/sqlite": "5.0.0",
-        "@types/jest": "^27.4.1",
-        "@types/node": "^17.0.22",
-        "@types/socket.io": "^3.0.2",
-        "@typescript-eslint/parser": "^5.17.0",
         "jest": "^27.5.1",
+        "nodemon": "^2.0.15",
+        "prettier": "^2.6.0",
         "socket.io-client": "^4.4.1",
         "ts-jest": "^27.1.4",
         "typescript": "^4.6.3"
