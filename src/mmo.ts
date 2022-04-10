@@ -12,30 +12,21 @@ const app = express();
 let Sentry;
 // Use Sentry for Telemetry if enabled
 if (process.env.USE_SENTRY === 'true') {
-    const express = require('express');
     Sentry = require('@sentry/node');
     const Tracing = require('@sentry/tracing');
 
     Sentry.init({
         dsn: process.env.SENTRY_DSN,
         integrations: [
-            // enable HTTP calls tracing
-            new Sentry.Integrations.Http({ tracing: true }),
-            // enable Express.js middleware tracing
-            new Tracing.Integrations.Express({ app }),
+            new Sentry.Integrations.Http({ tracing: true }), // enable HTTP calls tracing
+            new Tracing.Integrations.Express({ app }), // enable Express.js middleware tracing
         ],
 
-        // Set tracesSampleRate to 1.0 to capture 100%
-        // of transactions for performance monitoring.
-        // We recommend adjusting this value in production
-        tracesSampleRate: 1.0,
+        tracesSampleRate: 1.0, // Set tracesSampleRate to 1.0 to capture 100% of transactions for monitoring.
     });
 
-    // RequestHandler creates a separate execution context using domains, so that every
-    // transaction/span/breadcrumb is attached to its own Hub instance
-    app.use(Sentry.Handlers.requestHandler());
-    // TracingHandler creates a trace for every incoming request
-    app.use(Sentry.Handlers.tracingHandler());
+    app.use(Sentry.Handlers.requestHandler()); // RequestHandler creates a separate execution context using domains
+    app.use(Sentry.Handlers.tracingHandler()); // TracingHandler creates a trace for every incoming request
 }
 
 const server = require('http').createServer(app);
