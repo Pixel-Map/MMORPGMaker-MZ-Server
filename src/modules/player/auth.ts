@@ -125,5 +125,6 @@ export class Auth {
     // Register user emitter
     registerSuccess(client) {
         client.emit('register_success', { msg: 'Account has been created !' });
+        this.mmoCore.logger.info('New account has been created!');
     }
 }

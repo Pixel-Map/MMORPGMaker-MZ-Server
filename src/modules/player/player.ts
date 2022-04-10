@@ -127,6 +127,25 @@ export class Player {
                 });
             });
 
+            client.on('player_update_busy', function (payload) {
+                if (client.playerData === undefined) {
+                    return;
+                }
+                if (client.playerData.isBusy === payload) {
+                    return;
+                }
+
+                client.playerData.isBusy = payload;
+
+                database
+                    .savePlayer({ username: client.playerData.username, isBusy: client.playerData.isBusy })
+                    .then((r) => {
+                        client.broadcast
+                            .to('map-' + client.playerData.mapId)
+                            .emit('refresh_players_on_map', { playerId: client.id, playerData: client.playerData });
+                    });
+            });
+
             client.on('player_moving', function (payload) {
                 if (client.playerData === undefined) {
                     return;
