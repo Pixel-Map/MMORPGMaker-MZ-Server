@@ -62,6 +62,8 @@ describe('User authentication', () => {
                     mp: 41,
                     level: 1,
                     items: {},
+                    weapons: {},
+                    armors: {},
                     gold: 0,
                     equips: [],
                     skills: [],

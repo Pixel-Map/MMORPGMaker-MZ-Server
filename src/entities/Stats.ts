@@ -31,6 +31,12 @@ export class Stats {
     @Property({ type: 'json', default: '{}' })
     items: JSON;
 
+    @Property({ type: 'json', default: '{}' })
+    weapons: JSON;
+
+    @Property({ type: 'json', default: '{}' })
+    armors: JSON; // Yes it's actually armors.
+
     @Property({ default: 0 })
     gold: number;
 
