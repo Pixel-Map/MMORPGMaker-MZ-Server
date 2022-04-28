@@ -11,6 +11,7 @@
         "body-parser": "^1.15.1",
         "cors": "^2.8.5",
         "dotenv": "^16.0.0",
+        "ethereumjs-util": "^7.1.4",
         "ethers": "^5.6.4",
         "express": "*",
         "jsonwebtoken": "^8.5.1",
