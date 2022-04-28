@@ -60,6 +60,7 @@ app.use('/api/map/', MapsRouter);
 
 mmoCore.logger.info('######################################');
 mmoCore.logger.info('# MMORPG Maker MV - Samuel Lespes Cardillo');
+mmoCore.logger.info('# MMORPG Maker MZ - Axel "Andaroth" Fiolle');
 mmoCore.logger.info('# Check GitHub for updates');
 mmoCore.logger.info('######################################');
 
