@@ -250,80 +250,10 @@ export default class WorldATB {
         this.world.emitToPlayerByUsername(username, 'bang', reason);
     };
 
-    // MATHS
-    applyStatsFormula = (formula: string, source: ATBActor, target: ATBActor, type = 1): Stats => {
-        const { evaluate } = require('mathjs');
+    // MATHS helper
+    applyStatsFormula = (formula: string, source: ATBActor, target: ATBActor, type = 1): Stats =>
+        this.rpgmaker.applyStatsFormula(formula, source, target, type);
 
-        const scope = {
-            a: {
-                hp: source.hp,
-                mp: source.mp,
-                mhp: source.mhp,
-                mmp: source.mpm,
-                atk: source.atk,
-                def: source.def,
-                mat: source.mAtk,
-                mdf: source.mDef,
-                agi: source.agi,
-                luk: source.luck,
-                level: source.level,
-            },
-            b: {
-                hp: target.hp,
-                mp: target.mp,
-                mhp: target.mhp,
-                mmp: target.mpm,
-                atk: target.atk,
-                def: target.def,
-                mat: target.mAtk,
-                mdf: target.mDef,
-                agi: target.agi,
-                luk: target.luck,
-                level: target.level,
-            },
-        };
-
-        const stats = { 1: 'hp', 2: 'mp', 3: 'hp', 4: 'mp', 5: 'hp', 6: 'mp' };
-        const factors = { 1: -1, 2: -1, 3: 1, 4: 1, 5: -1, 6: -1 };
-        const delta: Stats = {
-            hp: 0,
-            mp: 0,
-            mhp: 0,
-            mpm: 0,
-            level: 0,
-            atk: 0,
-            def: 0,
-            mAtk: 0,
-            mDef: 0,
-            agi: 0,
-            luck: 0,
-        };
-        delta[stats[type]] = evaluate(formula, scope) > 0 ? evaluate(formula, scope) * factors[type] : 0;
-
-        return delta;
-    };
-
-    affectPlayerStats = async (username: string, formulaResult: any) => {
-        const players = await this.socket.modules.player.subs.player.getPlayers();
-        for (const key of Object.keys(formulaResult)) {
-            if (players[username.toLowerCase()].playerData.stats[key]) {
-                players[username.toLowerCase()].playerData.stats[key] += formulaResult[key];
-            }
-        }
-        if (
-            players[username.toLowerCase()].playerData.stats.hp > players[username.toLowerCase()].playerData.stats.mhp
-        ) {
-            players[username.toLowerCase()].playerData.stats.hp = players[username.toLowerCase()].playerData.stats.mhp;
-        }
-        if (
-            players[username.toLowerCase()].playerData.stats.mp > players[username.toLowerCase()].playerData.stats.mpm
-        ) {
-            players[username.toLowerCase()].playerData.stats.mp = players[username.toLowerCase()].playerData.stats.mpm;
-        }
-        if (players[username.toLowerCase()].playerData.permission < 100) {
-            if (players[username.toLowerCase()].playerData.stats.hp <= 0) this.makePlayerDead(username, 'fainted');
-        }
-
-        this.world.emitToPlayerByUsername(username, 'stats_update', players[username.toLowerCase()].playerData.stats);
-    };
+    affectPlayerStats = (username: string, formulaResult: any) =>
+        this.rpgmaker.affectPlayerStats(username, formulaResult);
 }

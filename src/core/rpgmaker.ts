@@ -1,14 +1,32 @@
 /*****************************
  RPG Maker Core Mock by Axel Fiolle
  *****************************/
-import GameWorld from './gameworld';
+import MMO_Core from './mmo_core';
 import pino from 'pino';
 import Logger = pino.Logger;
+
+interface Stats {
+    hp: number;
+    mp: number;
+    mhp: number;
+    mpm: number;
+    level: number;
+    atk: number;
+    def: number;
+    mAtk: number;
+    mDef: number;
+    agi: number;
+    luck: number;
+}
 export default class Rpgmaker {
-    private gameworld: GameWorld;
+    private socket;
+    // private watb;
+    private gameworld;
     private logger: Logger;
-    constructor(gameworld: GameWorld, logger: Logger) {
-        this.gameworld = gameworld;
+    constructor(mmoCore: MMO_Core, logger: Logger) {
+        this.socket = mmoCore.socket;
+        // this.watb = mmoCore.watb;
+        this.gameworld = mmoCore.gameworld;
         this.logger = logger;
     }
 
@@ -153,4 +171,84 @@ export default class Rpgmaker {
             .getAllEntitiesByMapId(mapId)
             .find((obj) => obj && !obj._through && hasSameCoords(obj) && !isOriginalElement(obj));
     }
+
+    applyStatsFormula = (formula: string, source: Stats, target: Stats, type = 1): Stats => {
+        const { evaluate } = require('mathjs');
+
+        const scope = {
+            a: {
+                hp: source.hp,
+                mp: source.mp,
+                mhp: source.mhp,
+                mmp: source.mpm,
+                atk: source.atk,
+                def: source.def,
+                mat: source.mAtk,
+                mdf: source.mDef,
+                agi: source.agi,
+                luk: source.luck,
+                level: source.level,
+            },
+            b: {
+                hp: target.hp,
+                mp: target.mp,
+                mhp: target.mhp,
+                mmp: target.mpm,
+                atk: target.atk,
+                def: target.def,
+                mat: target.mAtk,
+                mdf: target.mDef,
+                agi: target.agi,
+                luk: target.luck,
+                level: target.level,
+            },
+        };
+
+        const stats = { 1: 'hp', 2: 'mp', 3: 'hp', 4: 'mp', 5: 'hp', 6: 'mp' };
+        const factors = { 1: -1, 2: -1, 3: 1, 4: 1, 5: -1, 6: -1 };
+        const delta: Stats = {
+            hp: 0,
+            mp: 0,
+            mhp: 0,
+            mpm: 0,
+            level: 0,
+            atk: 0,
+            def: 0,
+            mAtk: 0,
+            mDef: 0,
+            agi: 0,
+            luck: 0,
+        };
+        delta[stats[type]] = evaluate(formula, scope) > 0 ? evaluate(formula, scope) * factors[type] : 0;
+
+        return delta;
+    };
+
+    affectPlayerStats = async (username: string, formulaResult: any) => {
+        const players = await this.socket.modules.player.subs.player.getPlayers();
+        for (const key of Object.keys(formulaResult)) {
+            if (players[username.toLowerCase()].playerData.stats[key]) {
+                players[username.toLowerCase()].playerData.stats[key] += formulaResult[key];
+            }
+        }
+        if (
+            players[username.toLowerCase()].playerData.stats.hp > players[username.toLowerCase()].playerData.stats.mhp
+        ) {
+            players[username.toLowerCase()].playerData.stats.hp = players[username.toLowerCase()].playerData.stats.mhp;
+        }
+        if (
+            players[username.toLowerCase()].playerData.stats.mp > players[username.toLowerCase()].playerData.stats.mpm
+        ) {
+            players[username.toLowerCase()].playerData.stats.mp = players[username.toLowerCase()].playerData.stats.mpm;
+        }
+        if (players[username.toLowerCase()].playerData.permission < 100) {
+            // if (players[username.toLowerCase()].playerData.stats.hp <= 0) {
+            //     this.watb.makePlayerDead(username, 'fainted');
+            // }
+        }
+        const _result = players[username.toLowerCase()];
+        this.gameworld.emitToPlayerByUsername(username, 'stats_update', _result);
+
+        return _result;
+    };
 }
