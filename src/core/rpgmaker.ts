@@ -5,7 +5,7 @@ import MMO_Core from './mmo_core';
 import pino from 'pino';
 import Logger = pino.Logger;
 
-interface Stats {
+export interface BaseStats {
     hp: number;
     mp: number;
     mhp: number;
@@ -18,6 +18,7 @@ interface Stats {
     agi: number;
     luck: number;
 }
+
 export default class Rpgmaker {
     private socket;
     // private watb;
@@ -172,7 +173,7 @@ export default class Rpgmaker {
             .find((obj) => obj && !obj._through && hasSameCoords(obj) && !isOriginalElement(obj));
     }
 
-    applyStatsFormula = (formula: string, source: Stats, target: Stats, type = 1): Stats => {
+    applyStatsFormula = (formula: string, source: BaseStats, target: BaseStats, type = 1): BaseStats => {
         const { evaluate } = require('mathjs');
 
         const scope = {
@@ -206,7 +207,7 @@ export default class Rpgmaker {
 
         const stats = { 1: 'hp', 2: 'mp', 3: 'hp', 4: 'mp', 5: 'hp', 6: 'mp' };
         const factors = { 1: -1, 2: -1, 3: 1, 4: 1, 5: -1, 6: -1 };
-        const delta: Stats = {
+        const delta: BaseStats = {
             hp: 0,
             mp: 0,
             mhp: 0,

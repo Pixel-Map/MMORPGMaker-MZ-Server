@@ -7,19 +7,8 @@ import Logger = pino.Logger;
 // ------ WORLD ATB by Axel Fiolle
 // ---------------------------------------
 
-interface Stats {
-    hp: number;
-    mp: number;
-    mhp: number;
-    mpm: number;
-    level: number;
-    atk: number;
-    def: number;
-    mAtk: number;
-    mDef: number;
-    agi: number;
-    luck: number;
-}
+import { BaseStats as Stats } from './rpgmaker';
+
 interface ATBAction {
     formula: string;
     type: number;
