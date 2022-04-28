@@ -59,8 +59,10 @@ app.use(
 app.use('/api/map/', MapsRouter);
 
 mmoCore.logger.info('######################################');
-mmoCore.logger.info('# MMORPG Maker MV - Samuel Lespes Cardillo');
-mmoCore.logger.info('# MMORPG Maker MZ - Axel "Andaroth" Fiolle');
+mmoCore.logger.info('# MMORPG Maker MV - Samuel Lespes Cardillo: https://github.com/samuelcardillo/MMORPGMaker-MV');
+mmoCore.logger.info('# MMORPG Maker MZ - Axel "Andaroth" Fiolle: https://github.com/Andaroth/MMORPGMaker-MZ');
+mmoCore.logger.info('# TypeScript Server by kenerwin88: https://github.com/Pixel-Map/MMORPGMaker-MZ-Server');
+mmoCore.logger.info('######################################');
 mmoCore.logger.info('# Check GitHub for updates');
 mmoCore.logger.info('######################################');
 
