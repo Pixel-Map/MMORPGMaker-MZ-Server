@@ -755,4 +755,17 @@ export default class GameWorld {
         });
         this.logger.info('[POCKETEVENTS] Finished loading persistent pocket events!');
     };
+
+    /*************************************************************************************** Sockets Extensions */
+    emitToMap = async (mapId: number, event: any, payload: any) => {
+        const players = await this.socket.modules.player.subs.player.getPlayers();
+        this.getAllPlayersByMapId(mapId).map(({ username }) => {
+            if (players[username.toLowerCase()]) players[username.toLowerCase()].emit(event, payload);
+        });
+    };
+
+    emitToPlayerByUsername = async (username: string, event: string, payload: any) => {
+        const players = await this.socket.modules.player.subs.player.getPlayers();
+        if (players[username.toLowerCase()]) players[username.toLowerCase()].emit(event, payload);
+    };
 }
