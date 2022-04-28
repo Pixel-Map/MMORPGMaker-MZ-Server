@@ -149,10 +149,14 @@ export default class GameWorld {
                 x: object.x,
                 y: object.y,
                 mapId: object.mapId,
+                atbUniqueId: '',
             });
         } else _node = this.makeNode(object);
 
-        if (_node) return this.nodes.push(_node);
+        if (_node) {
+            this.nodes.push(_node);
+            return _node;
+        }
     }
 
     makeNode(object) {
