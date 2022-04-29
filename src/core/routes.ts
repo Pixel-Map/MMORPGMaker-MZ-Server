@@ -2,10 +2,7 @@
 exports.initialize = function (app, serverConfig, callback) {
     try {
         app.get('/', (req, res) => {
-            res.sendFile('/src/admin_dev/index.html', { root: '.' });
-        });
-        app.get('/service-worker.js', (req, res) => {
-            res.sendFile('/src/admin_dev/service-worker.js', { root: '.' });
+            res.sendFile('/admin/index.html', { root: '.' });
         });
 
         // Add all the routes you want here

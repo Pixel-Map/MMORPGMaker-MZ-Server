@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import MMO_Core from './mmo_core';
 import pino from 'pino';
 import Logger = pino.Logger;
@@ -12,19 +11,44 @@ import { BaseStats as Stats } from './rpgmaker';
 interface ATBAction {
     formula: string;
     type: number;
-    from: string | number;
-    to: string | number;
+    from: string | number; // may be from the 'server'
+    to?: string | number; // may target the whole 'instance'
     atTurn: number;
-    date: Date;
-    effect?: Stats;
+    requestedAt: Date;
+    resolvedAt?: Date;
+    effect?: Stats | DOT | StatusAlteration;
+}
+
+interface DOT {
+    // Damages On Turn
+    fightUniqueId: string; // Belongs to instance
+    fromTurn: number; // Starts at turn nX
+    turnsInterval: number | 1; // Happens every X turns
+    turnOccurences: number | 1; // Happens X times
+    effect: Stats; // Delta stats
+    to: Array<ATBActor>; // Target(s)
+}
+
+interface StatusAlteration {
+    type: number;
+    to: ATBActor;
 }
 
 interface ATBActor extends Stats {
     enemyId?: number; // if from game datas
-    playerId?: string;
-    status: number;
-    isPlaying?: boolean;
-    killedBy?: string; // player unique ID
+    playerId?: string; // if is player
+    status: number; // alterations
+    isPlaying?: boolean; // current turn to this actor
+    killedBy?: string | number; // player unique ID or gameEnemy ID
+}
+
+interface Loot {
+    object?: {
+        id: number;
+        amount: number;
+    };
+    gold?: number;
+    reservedTo?: Array<string>; // Lock loot to specific(s) player(s)
 }
 
 interface ATBInstance {
@@ -33,22 +57,22 @@ interface ATBInstance {
     initiator: string | number; // playerUniqueId or a gameEnemy ID
     actors: Array<ATBActor>;
     turn: number;
-    startedAt: Date;
-    isPublic?: boolean;
+    startedAt?: Date;
+    isPublic?: boolean; // other peeps on the map can join
     privateParty?: string; // parties have textual IDs
     mapId?: number;
     mapX?: number;
     mapY?: number;
     troopId?: number;
-    combat?: {
-        initiator: any;
-        state: any;
-        members: any;
-        actions: any;
-    };
+    state?: any;
+    loots?: Array<Loot>;
+    actions?: Array<ATBAction>;
+    isPartySurprised?: boolean;
+    pendingPlayerIds?: Array<string>;
+    fightEvents?: Array<any>; // RPG Maker Pages
 }
 
-export default class WorldATB {
+export default class WATB {
     public fights: Array<ATBInstance> = []; // All the fights that are currently running
 
     private socket: any;
@@ -176,7 +200,6 @@ export default class WorldATB {
             initiator: initiator || 'server',
             actors,
             turn: 0,
-            startedAt: new Date(),
             troopId,
         };
 
@@ -197,6 +220,7 @@ export default class WorldATB {
         return _newInstance;
     };
 
+    // INSTANCE LIFECYCLE FUNCTIONS
     startFight = (fightUniqueId: string) => {
         this.logger.info('[WATB] startFight', fightUniqueId);
         const _fight = this.getFightInstance(fightUniqueId);
@@ -205,16 +229,11 @@ export default class WorldATB {
         this.getFightInstance(fightUniqueId)
             .actors.filter((actor) => !!actor.playerId)
             .map((player) => {
+                // assign fight to every participating player
                 const _playerNode = this.world.getNodeBy('playerId', player.playerId);
                 this.world.mutateNode(_playerNode, { atbUniqueId: _fight.uniqueId });
             });
-        // Attach the RPG Maker fight engine
-        this.getFightInstance(fightUniqueId).combat = {
-            initiator: _fight.actors[0],
-            state: this.gameTroops[_fight.troopId],
-            members: {},
-            actions: {},
-        };
+        this.getFightInstance(fightUniqueId).startedAt = new Date();
     };
 
     endFight = (fightUniqueId: string) => {
