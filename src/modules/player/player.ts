@@ -83,9 +83,18 @@ export class Player {
                 if (client.playerData === undefined) {
                     return;
                 }
-                wrap(client.playerData.stats).assign({ ...payload }, { mergeObjects: true });
+                client.playerData.stats.hp = payload.hp;
+                client.playerData.stats.mp = payload.mp;
+                client.playerData.stats.equips = payload.equips;
+                client.playerData.stats.skills = payload.skills;
+                client.playerData.stats.level = payload.level;
+                client.playerData.stats.exp = payload.exp;
+                client.playerData.stats.classId = payload.classId;
+                client.playerData.stats.gold = payload.gold;
+                client.playerData.stats.items = payload.items;
+                client.playerData.stats.armors = payload.armors;
+                client.playerData.stats.weapons = payload.weapons;
                 await database.savePlayer(client.playerData);
-                await this.refreshData(client);
             });
 
             client.on('player_update_skin', function (payload) {
