@@ -29,7 +29,7 @@
         hostname = hostname[1] + "." + hostname[2];
       }
 
-      window.projectUrl = window.location.protocol + "//" + hostname + ":8097";
+      window.projectUrl = window.location.protocol + "//" + hostname + ":" + window.location.port;
       window.socket     = io.connect(window.projectUrl);
     </script>
     <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
