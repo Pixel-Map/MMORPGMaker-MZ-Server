@@ -9,6 +9,7 @@
         "async": "^3.1.0",
         "axios": "^0.27.2",
         "body-parser": "^1.15.1",
+        "copyfiles": "^2.4.1",
         "cors": "^2.8.5",
         "dotenv": "^16.0.0",
         "ethereumjs-util": "^7.1.4",
@@ -19,6 +20,7 @@
         "pino-http": "^6.6.0",
         "pino-multi-stream": "^6.0.0",
         "pino-pretty": "^7.6.0",
+        "rimraf": "^3.0.2",
         "socket.io": "4.4.1",
         "source-map-loader": "^3.0.1",
         "ts-loader": "^9.2.8",
@@ -39,8 +41,10 @@
         "node": ">=v16.x"
     },
     "scripts": {
+        "clean": "rimraf dist/",
+        "copy-files": "copyfiles -u 1 \"src/admin/**/*\" dist/",
         "lint": "eslint .",
-        "build": "tsc",
+        "build": "npm run clean && npm run copy-files && tsc",
         "start": "node dist/mmo.js",
         "tsnode": "ts-node src/mmo.ts",
         "dev": "nodemon src/mmo.ts",
