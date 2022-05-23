@@ -103,6 +103,18 @@ The server utilizes [PinoJS](https://github.com/pinojs/pino) to streamline loggi
 STDOUT, as well as output as JSON to a dated file.  To adjust the log level, just set the environment variable "PINO_LOG_LEVEL" to
 the desired level (from most to least verbose -- "trace", "debug", "info", "warn", "error", and "fatal").
 
+### Admin Panel
+The Admin panel must be generated via Polymer for now.
+
+To do so, run the following:
+```
+cd src/admin_dev
+npm i
+bower i
+polymer build
+rm -Rf ../admin && mv build/custom-unbundled ../admin
+```
+
 
 ---
 
