@@ -3,6 +3,7 @@ dist/
 .idea/
 .builds/
 src/admin_dev/bower_components
+src/admin/
 rethinkdb_data/
 save/
 server/admin_dev/bower_components/
