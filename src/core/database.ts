@@ -5,6 +5,7 @@ import { Skin } from '../entities/Skin';
 import { Stats } from '../entities/Stats';
 import pino from 'pino';
 import Logger = pino.Logger;
+import { ServerConfig } from '../entities/ServerConfig';
 const security = require('./security');
 
 export default class Database {
@@ -13,20 +14,18 @@ export default class Database {
         this.logger = logger;
     }
     private orm: MikroORM;
-    public SERVER_CONFIG = {
+    public SERVER_CONFIG: ServerConfig = {
+        id: 1,
         newPlayerDetails: {
-            username: '',
-            password: '',
             permission: 0,
             mapId: 1,
             x: 5,
             y: 5,
         },
-        passwordRequired: true,
-        globalSwitches: {},
-        partySwitches: {},
-        globalVariables: {},
-        offlineMaps: {},
+        globalSwitches: new Map(),
+        partySwitches: new Map(),
+        globalVariables: new Map(),
+        offlineMaps: new Map(),
     };
 
     async initialize() {
@@ -235,49 +234,60 @@ export default class Database {
     }
 
     /// ////////////// SERVER
+    async reloadConfigFromDatabase() {
+        this.logger.info('Reloading Config');
+        const em = this.orm.em.fork();
+        const serverConfigRepository = em.getRepository(ServerConfig);
+        let serverConfig = await serverConfigRepository.findOne({ id: 1 });
 
-    changeConfig(type, payload, callback) {
-        // let query = r.db('mmorpg').table('config')(0);
-        //
-        // if (type === 'globalSwitches') {
-        //     query = query.update({ globalSwitches: r.literal(payload) });
-        // } else if (type === 'partySwitches') {
-        //     query = query.update({ partySwitches: r.literal(payload) });
-        // } else if (type === 'offlineMaps') {
-        //     query = query.update({ offlineMaps: r.literal(payload) });
-        // } else if (type === 'globalVariables') {
-        //     query = query.update({ globalVariables: r.literal(payload) });
-        // } else if (type === 'newPlayerDetails') {
-        //     query = query.update({ newPlayerDetails: r.literal(payload) });
-        // }
-        //
-        // query
-        //     .run(conn)
-        //     .then(function (cursor) {
-        //         return cursor;
-        //     })
-        //     .then(() => {
-        //         this.reloadConfig(() => {
-        //             console.log('[I] Server configuration changes saved.');
-        //         });
-        //         callback();
-        //     })
-        //     .finally(() => {
-        //         conn.close();
-        //     });
+        // If Config doesn't exist, use default!
+        if (!serverConfig) {
+            serverConfig = serverConfigRepository.create(this.SERVER_CONFIG);
+            serverConfigRepository.persistAndFlush(serverConfig);
+        }
+
+        this.SERVER_CONFIG = serverConfig;
     }
 
-    saveConfig() {
-        // r.db('mmorpg')
-        //     .table('config')(0)
-        //     .update(this.SERVER_CONFIG)
-        //     .run(conn)
-        //     .then(() => {
-        //         console.log('[I] Server configuration changes saved.');
-        //     })
-        //     .finally(() => {
-        //         conn.close();
-        //     });
+    async changeConfig(type, payload, callback) {
+        this.logger.info('Updating server config!');
+
+        switch (type) {
+            case 'newPlayerDetails': {
+                this.SERVER_CONFIG.newPlayerDetails = {
+                    x: payload.x,
+                    y: payload.y,
+                    mapId: payload.mapId,
+                    permission: payload.permission,
+                };
+                break;
+            }
+            case 'globalSwitches': {
+                this.SERVER_CONFIG.globalSwitches = payload;
+                break;
+            }
+            case 'globalVariables': {
+                this.SERVER_CONFIG.globalVariables = payload;
+                break;
+            }
+            case 'offlineMaps': {
+                this.SERVER_CONFIG.offlineMaps = payload;
+                break;
+            }
+            case 'partySwitches': {
+                this.SERVER_CONFIG.partySwitches = payload;
+                break;
+            }
+        }
+        await this.saveConfig();
+        callback();
+    }
+
+    async saveConfig() {
+        const em = this.orm.em.fork();
+        const serverConfigRepository = em.getRepository(ServerConfig);
+        serverConfigRepository.persistAndFlush(this.SERVER_CONFIG);
+        this.logger.info('Saved Server Config!');
     }
 
     close() {

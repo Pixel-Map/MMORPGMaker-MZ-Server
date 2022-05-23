@@ -1,0 +1,63 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/mmomv-admin.html",
+  "fragments": [
+    "src/view-signin.html",
+    "src/view-signedin.html",
+    "src/signedin/signedin-dashboard.html",
+    "src/signedin/signedin-players.html",
+    "src/signedin/players/players-list.html",
+    "src/signedin/players/players-view.html",
+    "src/signedin/signedin-banks.html",
+    "src/signedin/banks/banks-list.html",
+    "src/signedin/signedin-server.html"
+  ],
+  "sources": [
+    "src/**/*",
+    "images/**/*",
+    "scripts/**/*",
+    "index.html",
+    "src/mmomv-admin.html",
+    "src/view-signin.html",
+    "src/view-signedin.html",
+    "src/signedin/signedin-dashboard.html",
+    "src/signedin/signedin-players.html",
+    "src/signedin/players/players-list.html",
+    "src/signedin/players/players-view.html",
+    "src/signedin/signedin-banks.html",
+    "src/signedin/banks/banks-list.html",
+    "src/signedin/signedin-server.html"
+  ],
+  "extraDependencies": [
+    "bower_components/webcomponentsjs/*.js",
+    "manifest.json",
+    "bower_components/webcomponentsjs/*.js"
+  ],
+  "builds": [
+    {
+      "name": "custom-unbundled",
+      "browserCapabilities": [
+        "es2015",
+        "push"
+      ],
+      "addServiceWorker": false,
+      "stripComments": "false",
+      "bundle": false,
+      "js": {
+        "minify": false
+      },
+      "css": {
+        "minify": false
+      },
+      "html": {
+        "minify": false
+      }
+    }
+  ],
+  "lint": {
+    "rules": [
+      "polymer-2"
+    ]
+  },
+  "moduleResolution": "node"
+}

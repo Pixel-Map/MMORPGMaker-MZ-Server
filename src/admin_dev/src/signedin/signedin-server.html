@@ -36,7 +36,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
-    <iron-ajax id="ajaxUpdateServer" on-response="_serverChangesMade"></iron-ajax>    
+    <iron-ajax id="ajaxUpdateServer" on-response="_serverChangesMade"></iron-ajax>
 
      <!-- First row !-->
      <div class="row">
@@ -48,21 +48,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <vaadin-text-field required value="{{serverData.serverConfig.newPlayerDetails.mapId}}" label="Map ID" name="mapid"></vaadin-text-field>
               <vaadin-text-field required value="{{serverData.serverConfig.newPlayerDetails.x}}" label="Spawn position X" name="x"></vaadin-text-field>
               <vaadin-text-field required value="{{serverData.serverConfig.newPlayerDetails.y}}" label="Spawn position Y" name="y"></vaadin-text-field>
-              <vaadin-button on-tap="_saveChanges">Save</vaadin-button>            
+              <vaadin-button on-tap="_saveChanges">Save</vaadin-button>
             </form>
           </iron-form>
         </div>
       </div>
-      
+
       <!-- Second row !-->
       <div class="row">
         <!-- Leaderboard !-->
         <div class="box leaderboard">
           <center><h2>Switches</h2></center>
-          <vaadin-button on-tap="_addSwitch">Add switch</vaadin-button>        
+          <vaadin-button on-tap="_addSwitch">Add switch</vaadin-button>
           <!-- Party switch !-->
           <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_switches]]" active-item="{{activeItem}}">
-          
+
               <vaadin-grid-column resizable>
                 <template class="header">
                   <vaadin-grid-filter aria-label="id" path="id" value="[[_filterid]]">
@@ -71,7 +71,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </template>
                 <template>{{item.id}} ({{item.name}})</template>
               </vaadin-grid-column>
-        
+
               <vaadin-grid-column resizable>
                   <template class="header">
                     <vaadin-grid-filter aria-label="type" path="type" value="[[_filtertype]]">
@@ -80,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </template>
                 <template>{{item.type}}</template>
               </vaadin-grid-column>
-        
+
               <vaadin-grid-column resizable>
                 <template class="header">
                   <vaadin-grid-filter aria-label="status" path="status" value="[[_filterStatus]]">
@@ -88,14 +88,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </vaadin-grid-filter>
                 </template>
                 <template>
-                  <select id="value" name="value" on-change="_changeSwitchValue" class="form-control">
-                    <option slot="filter" value$="{{item.value}}">{{item.value}}</option>
-                    <option value="true">True</option>
-                    <option value="false">False</option>
+                  <select id="value" value="{{item.value}}" name="value" on-change="_changeSwitchValue" class="form-control">
+                    <option value="true">true</option>
+                    <option value="false">false</option>
                   </select>
                 </template>
               </vaadin-grid-column>
-        
+
               <vaadin-grid-column resizable flex-grow="0">
                 <template class="header">
                   <span></span>
@@ -106,11 +105,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </vaadin-grid-column>
             </vaadin-grid>
         </div>
-  
+
         <!-- New users !-->
         <div class="box registrations">
           <center><h2>Global Variables</h2></center>
-          <vaadin-button on-tap="_addVariable">Add variable</vaadin-button>                  
+          <vaadin-button on-tap="_addVariable">Add variable</vaadin-button>
           <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_variables]]">
             <vaadin-grid-column resizable>
               <template class="header">
@@ -125,8 +124,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
               <template>{{item.value}}</template>
             </vaadin-grid-column>
-  
-  
+
+
             <vaadin-grid-column resizable flex-grow="0">
               <template class="header">
                 <span></span>
@@ -140,7 +139,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div class="box registrations">
           <center><h2>Offline Maps</h2></center>
-          <vaadin-button on-tap="_addOfflineMap">Add offline map</vaadin-button>                  
+          <vaadin-button on-tap="_addOfflineMap">Add offline map</vaadin-button>
           <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_maps]]">
             <vaadin-grid-column resizable>
               <template class="header">
@@ -148,7 +147,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
               <template>{{item.realId}} ({{item.name}})</template>
             </vaadin-grid-column>
-  
+
             <vaadin-grid-column resizable flex-grow="0">
               <template class="header">
                 <span></span>
@@ -229,7 +228,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       connectedCallback() {
         super.connectedCallback();
-        
+
         this._loadSwitches();
         this._loadOfflineMaps();
         this._loadVariables();
@@ -241,7 +240,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _saveChanges() {
         let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
         let form = Polymer.dom(this.root).querySelector("#formNewPlayerDetails").serializeForm();
-        
+
         if((form.mapid.length || form.x.length || form.y.length) <= 0)
           return this.dispatchEvent(new CustomEvent('show-modal', {
             bubbles: true,
@@ -275,12 +274,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._variables = [];
 
         for(var i = 0; i < globalVariables; i++) {
-          let payload = { 
+          let payload = {
             id: Object.keys(this.serverData.serverConfig.globalVariables)[i],
             value: this.serverData.serverConfig.globalVariables[Object.keys(this.serverData.serverConfig.globalVariables)[i]]
           }
 
-          if(gameDataLoaded && this.serverData.gameData.System.variables[payload.id]) payload.name = this.serverData.gameData.System.variables[payload.id];          
+          if(gameDataLoaded && this.serverData.gameData.System.variables[payload.id]) payload.name = this.serverData.gameData.System.variables[payload.id];
 
           this.push("_variables", payload);
         }
@@ -304,7 +303,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }));
 
         this.serverData.serverConfig.globalVariables[form.variableid] = parseInt(form.variablevalue);
-        
+
         Polymer.dom(this.root).querySelector("#formAddVariable").children[0].reset();
 
         ironAjax.method       = "PATCH";
@@ -342,13 +341,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         for(var i = 0; i < offlineMaps; i++) {
           let realId = parseInt(Object.keys(this.serverData.serverConfig.offlineMaps)[i].split("-")[1]);
-          let payload = { 
+          let payload = {
             id: Object.keys(this.serverData.serverConfig.offlineMaps)[i],
             realId: realId,
             value: this.serverData.serverConfig.offlineMaps[Object.keys(this.serverData.serverConfig.offlineMaps)[i]]
           }
 
-          if(gameDataLoaded && this.serverData.gameData.MapInfos[realId]) payload.name = this.serverData.gameData.MapInfos[realId].name;          
+          if(gameDataLoaded && this.serverData.gameData.MapInfos[realId]) payload.name = this.serverData.gameData.MapInfos[realId].name;
 
           this.push("_maps", payload);
         }
@@ -372,7 +371,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }));
 
         this.serverData.serverConfig.offlineMaps["map-" + form.mapid] = true;
-        
+
         Polymer.dom(this.root).querySelector("#formAddOfflinemap").children[0].reset();
 
         ironAjax.method       = "PATCH";
@@ -410,19 +409,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._switches = [];
 
         for(var i = 0; i < globalSwitches; i++) {
-          let payload = { 
+          let payload = {
             id: Object.keys(this.serverData.serverConfig.globalSwitches)[i],
             type: "global",
             value: this.serverData.serverConfig.globalSwitches[Object.keys(this.serverData.serverConfig.globalSwitches)[i]]
           }
 
-          if(gameDataLoaded && this.serverData.gameData.System.switches[payload.id]) payload.name = this.serverData.gameData.System.switches[payload.id];          
+          if(gameDataLoaded && this.serverData.gameData.System.switches[payload.id]) payload.name = this.serverData.gameData.System.switches[payload.id];
 
           this.push("_switches", payload);
         }
 
         for(var i = 0; i < partySwitches; i++) {
-          let payload = { 
+          let payload = {
             id: Object.keys(this.serverData.serverConfig.partySwitches)[i],
             type: "party",
             value: this.serverData.serverConfig.partySwitches[Object.keys(this.serverData.serverConfig.partySwitches)[i]]
@@ -470,7 +469,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         if(form.type === "global") this.serverData.serverConfig.globalSwitches[form.switchid] = false;
         else this.serverData.serverConfig.partySwitches[form.switchid] = false;
-        
+
         Polymer.dom(this.root).querySelector("#formAddSwitch").children[0].reset();
 
         ironAjax.method       = "PATCH";
@@ -483,12 +482,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _deleteSwitch(e) {
-        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");        
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
         let selectedSwitch = e.model.item;
 
-        if(selectedSwitch.type === "global") 
+        if(selectedSwitch.type === "global")
           delete this.serverData.serverConfig.globalSwitches[selectedSwitch.id];
-        else 
+        else
           delete this.serverData.serverConfig.partySwitches[selectedSwitch.id];
 
         ironAjax.method       = "PATCH";

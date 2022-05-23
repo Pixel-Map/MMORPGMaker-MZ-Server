@@ -22,14 +22,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply(--layout-center);
       }
 
-      .warning { 
+      .warning {
         background-color:	rgb(255,255,224);
         color: black;
         padding: 8px;
         border-radius: 8px;
         border: 1px solid rgb(255,255,224);
       }
-      
+
       .news {
         overflow-y: scroll;
         border: none;
@@ -70,7 +70,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       connectedCallback() {
         super.connectedCallback();
-
         this.set("_gameLoaded", (Object.keys(this.serverData.gameData).length > 0) ? true : false);
       }
 
