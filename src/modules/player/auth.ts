@@ -17,7 +17,7 @@ export class Auth {
                 if (data.username === undefined) {
                     return this.loginError(client, 'Missing username');
                 }
-                if (database.SERVER_CONFIG.passwordRequired && data.password === undefined) {
+                if (data.password === undefined) {
                     return this.loginError(client, 'Missing password');
                 }
 
@@ -54,7 +54,7 @@ export class Auth {
                     return this.loginError(client, 'Incorrect username format');
                 }
                 // password validation
-                if (database.SERVER_CONFIG.passwordRequired && data.password === undefined) {
+                if (data.password === undefined) {
                     return this.loginError(client, 'Missing password');
                 }
 

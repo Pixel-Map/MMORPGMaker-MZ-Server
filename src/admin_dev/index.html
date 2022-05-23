@@ -9,7 +9,7 @@
     <link rel="icon" href="images/favicon.ico">
     <script src="scripts/socket.io.js"></script>
     <script src="scripts/moment.js"></script>
-    
+
     <script>
       window.Polymer = {rootPath: '/'};
 
@@ -29,7 +29,7 @@
         hostname = hostname[1] + "." + hostname[2];
       }
 
-      window.projectUrl = window.location.protocol + "//" + hostname;
+      window.projectUrl = window.location.protocol + "//" + hostname + ":8097";
       window.socket     = io.connect(window.projectUrl);
     </script>
     <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>

@@ -1,0 +1,57 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<dom-module id="wysiwyg-localize">
+	<template>
+		<slot></slot>
+	</template>
+	<script>
+		class WysiwygLocalize extends Polymer.Element {
+			static get is() { return 'wysiwyg-localize' }
+	
+			static get properties() {
+				return {
+					stringKey: {
+						type: String,
+						notify: true
+					},
+					resources: {
+						type: Object,
+						notify: true
+					},
+					language: {
+						type: String,
+						notify: true
+					},
+					localized: {
+						type: String,
+						value: '',
+						computed: '_computeLocalized(stringKey, resources, language)',
+						observer: '_localizedChanged',
+						notify: true
+					}
+				};
+			}
+		
+			ready() {
+				super.ready();
+		
+				setTimeout(
+					function () {
+						this._localizedChanged();
+					}.bind(this),
+					100
+				);
+			}
+		
+			_computeLocalized (stringKey, resources, language) {
+				if (resources && resources[language] && resources[language][stringKey]) return resources[language][stringKey];
+				return '';
+			}
+		
+			_localizedChanged() {
+				this.textContent = this.localized;
+			}
+		}
+
+		customElements.define(WysiwygLocalize.is, WysiwygLocalize);
+	</script>
+</dom-module>

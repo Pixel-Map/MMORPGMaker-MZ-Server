@@ -33,6 +33,9 @@ export class Player {
     @Property({ default: 0 })
     permission: number;
 
+    @Property({ persist: false })
+    token: string; // JWT Token for Web auth
+
     @OneToOne(() => Skin, (skin) => skin.user)
     skin: Skin;
 

@@ -1,0 +1,29 @@
+{
+  "name": "paper-dropdown-menu-multi",
+  "authors": [
+    "Gang Tian <gang.tian@outlook.com>"
+  ],
+  "description": "Multiselect paper dropdown menu. Based on Polymer 2.0",
+  "main": "paper-dropdown-menu-multi.html",
+  "keywords": [
+    "multiselect",
+    "paper",
+    "paper-dropdown-menu"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "^2.0.1",
+    "paper-dropdown-menu": "^2.0.0",
+    "paper-checkbox": "^2.0.0",
+    "iron-selector": "^2.0.0",
+    "neon-animation": "^2.0.1"
+  }
+}

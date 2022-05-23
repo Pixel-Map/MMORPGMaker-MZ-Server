@@ -66,7 +66,7 @@ export function isTokenValid(req, res, next) {
 
 export function generateToken(requestDetails, userDetails, callback) {
     const error = false;
-    const generatedToken = jwt.sign(userDetails, securityDetails.tokenPassphrase, { expiresIn: '1d' }); // gen the token
+    const generatedToken = jwt.sign(userDetails.toJSON(), securityDetails.tokenPassphrase, { expiresIn: '1d' });
 
     if (activeTokens[requestDetails.body.email] === undefined) {
         activeTokens[requestDetails.body.email] = [];

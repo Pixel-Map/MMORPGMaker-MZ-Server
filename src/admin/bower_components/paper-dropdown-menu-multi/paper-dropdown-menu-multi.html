@@ -1,0 +1,111 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../paper-styles/default-theme.html">
+<link rel="import" href="../iron-selector/iron-selector.html">
+<link rel="import" href="../neon-animation/web-animations.html">
+<dom-module id="paper-dropdown-menu-multi">
+	<!-- Optional shadow DOM template -->
+	<template>
+		<style>
+			paper-checkbox{
+				padding-left:15px;
+				padding-right:15px;
+				padding-top:10px;
+				padding-bottom:5px;
+			}
+			#dummy{
+				display:none;
+			}
+		</style>
+
+		<!-- shadow DOM for your element -->
+		<paper-dropdown-menu label="[[label]]" id="dropdownMenu" required="[[required]]" on-paper-dropdown-close="_closingWindow" on-paper-dropdown-open="_openingWindow" value="{{value}}">
+			<div class="dropdown-content" slot="dropdown-content">
+			<template is="dom-repeat" items="[[selections]]">
+				<div><paper-checkbox on-change="_updateValue">[[item]]</paper-checkbox></div>
+			</template>
+			<iron-selector id="selected">
+				<div id="dummy"></div>
+			</iron-selector>
+			</div>
+		</paper-dropdown-menu>
+	</template>
+
+		
+	<script>// Define the element's API using an ES2015 class
+class PaperDropDownMenuMulti extends Polymer.Element {
+  static get is() {
+    return 'paper-dropdown-menu-multi';
+  } //Declare properties for the element's public API
+
+
+  static get properties() {
+    return {
+      label: {
+        type: String
+      },
+      required: {
+        type: Boolean
+      },
+      selections: {
+        type: Array,
+        observer: '_selectionChanged'
+      },
+      value: {
+        type: Array
+      },
+      _value: {
+        type: Array,
+        value: []
+      },
+      maxDisplay: {
+        type: Number,
+        value: 5
+      }
+    };
+  }
+
+  _selectionChanged() {
+    this._value = [];
+    this.$.selected.selected = null;
+    this.$.dummy.textContent = '';
+
+    if (this.shadowRoot.querySelectorAll('paper-checkbox').length > 0) {
+      this.shadowRoot.querySelectorAll('paper-checkbox').forEach(item => {
+        item.checked = false;
+      });
+    }
+  }
+
+  _openingWindow() {
+    this.$.selected.selected = null;
+  }
+
+  _closingWindow() {
+    this.$.dummy.textContent = this._value.length <= this.maxDisplay ? this._value.join(',') : `${this._value.length} selected`;
+    this.$.selected.selected = '0';
+    this.value = this._value;
+    this.dispatchEvent(new CustomEvent('value-changed', {
+      detail: this.value
+    }));
+  }
+
+  _updateValue(e) {
+    let that = this;
+    this._value = [];
+    this.shadowRoot.querySelectorAll('paper-checkbox').forEach(item => {
+      if (item.checked) {
+        that._value.push(item.textContent);
+      }
+
+      ;
+    });
+  }
+
+} // Register the x-custom element with the browser
+
+
+customElements.define(PaperDropDownMenuMulti.is, PaperDropDownMenuMulti);</script>
+
+</dom-module>

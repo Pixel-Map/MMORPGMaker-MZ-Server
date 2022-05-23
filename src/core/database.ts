@@ -5,6 +5,7 @@ import { Skin } from '../entities/Skin';
 import { Stats } from '../entities/Stats';
 import pino from 'pino';
 import Logger = pino.Logger;
+import { ServerConfig } from '../entities/ServerConfig';
 const security = require('./security');
 
 export default class Database {
@@ -15,14 +16,11 @@ export default class Database {
     private orm: MikroORM;
     public SERVER_CONFIG = {
         newPlayerDetails: {
-            username: '',
-            password: '',
             permission: 0,
             mapId: 1,
             x: 5,
             y: 5,
         },
-        passwordRequired: true,
         globalSwitches: {},
         partySwitches: {},
         globalVariables: {},
@@ -235,8 +233,27 @@ export default class Database {
     }
 
     /// ////////////// SERVER
+    async reloadConfig() {
+        this.logger.info('Reloading Config');
+        const em = this.orm.em.fork();
+        const serverConfigRepository = em.getRepository(ServerConfig);
+        let serverConfig = await serverConfigRepository.findOne({ id: 1 });
+        if (!serverConfig) {
+            serverConfig = serverConfigRepository.create({
+                mapId: this.SERVER_CONFIG.newPlayerDetails.mapId,
+                permission: this.SERVER_CONFIG.newPlayerDetails.permission,
+                x: this.SERVER_CONFIG.newPlayerDetails.x,
+                y: this.SERVER_CONFIG.newPlayerDetails.y,
+            });
+            serverConfigRepository.persistAndFlush(serverConfig);
+        }
+
+        this.SERVER_CONFIG.newPlayerDetails = serverConfig;
+        console.log(this.SERVER_CONFIG);
+    }
 
     changeConfig(type, payload, callback) {
+        console.log(payload);
         // let query = r.db('mmorpg').table('config')(0);
         //
         // if (type === 'globalSwitches') {

@@ -1,5 +1,4 @@
 import MMO_Core from '../../core/mmo_core';
-import { wrap } from '@mikro-orm/core';
 import Socket from '../../core/socket';
 import { Auth } from './auth';
 import { Map } from './map';

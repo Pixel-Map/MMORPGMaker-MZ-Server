@@ -20,6 +20,7 @@ router.get('/', isTokenValid, function (req, res) {
 
 // Send back the configurations of the server
 router.patch('/:type', isTokenValid, function (req, res) {
+    console.log(req);
     if (!req.body) {
         return;
     }

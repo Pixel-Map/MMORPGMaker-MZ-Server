@@ -70,7 +70,7 @@ try {
     // Core
     const routes = require('./core/routes');
 
-    mmoCore.database.initialize();
+    mmoCore.database.initialize().then((r) => mmoCore.database.reloadConfig());
     // Initializing the database
     // Initializing server config
     const port = process.env.PORT ? process.env.PORT : 8097;

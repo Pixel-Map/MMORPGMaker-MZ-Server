@@ -9,7 +9,7 @@
     "src/signedin/players/players-list.html",
     "src/signedin/players/players-view.html",
     "src/signedin/signedin-banks.html",
-    "src/signedin/banks/banks-list.html",    
+    "src/signedin/banks/banks-list.html",
     "src/signedin/signedin-server.html"
   ],
   "sources": [
@@ -26,8 +26,14 @@
   },
   "builds": [
     {
-      "preset": "es5-bundled",
-      "addServiceWorker": false
+      "name": "custom-unbundled",
+      "browserCapabilities": ["es2015", "push"],
+      "addServiceWorker": false,
+      "stripComments": "false",
+      "bundle": false,
+      "js": {"minify": false},
+      "css": {"minify": false},
+      "html": {"minify": false}
     }
   ]
 }
