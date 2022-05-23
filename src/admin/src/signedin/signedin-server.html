@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}" pattern="/server" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
-    <iron-ajax id="ajaxUpdateServer" on-response="_serverChangesMade"></iron-ajax>    
+    <iron-ajax id="ajaxUpdateServer" on-response="_serverChangesMade"></iron-ajax>
 
      <!-- First row !-->
      <div class="row">
@@ -42,21 +42,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <vaadin-text-field required="" value="{{serverData.serverConfig.newPlayerDetails.mapId}}" label="Map ID" name="mapid"></vaadin-text-field>
               <vaadin-text-field required="" value="{{serverData.serverConfig.newPlayerDetails.x}}" label="Spawn position X" name="x"></vaadin-text-field>
               <vaadin-text-field required="" value="{{serverData.serverConfig.newPlayerDetails.y}}" label="Spawn position Y" name="y"></vaadin-text-field>
-              <vaadin-button on-tap="_saveChanges">Save</vaadin-button>            
+              <vaadin-button on-tap="_saveChanges">Save</vaadin-button>
             </form>
           </iron-form>
         </div>
       </div>
-      
+
       <!-- Second row !-->
       <div class="row">
         <!-- Leaderboard !-->
         <div class="box leaderboard">
           <center><h2>Switches</h2></center>
-          <vaadin-button on-tap="_addSwitch">Add switch</vaadin-button>        
+          <vaadin-button on-tap="_addSwitch">Add switch</vaadin-button>
           <!-- Party switch !-->
           <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_switches]]" active-item="{{activeItem}}">
-          
+
               <vaadin-grid-column resizable="">
                 <template class="header">
                   <vaadin-grid-filter aria-label="id" path="id" value="[[_filterid]]">
@@ -65,7 +65,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </template>
                 <template>{{item.id}} ({{item.name}})</template>
               </vaadin-grid-column>
-        
+
               <vaadin-grid-column resizable="">
                   <template class="header">
                     <vaadin-grid-filter aria-label="type" path="type" value="[[_filtertype]]">
@@ -74,7 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </template>
                 <template>{{item.type}}</template>
               </vaadin-grid-column>
-        
+
               <vaadin-grid-column resizable="">
                 <template class="header">
                   <vaadin-grid-filter aria-label="status" path="status" value="[[_filterStatus]]">
@@ -82,14 +82,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </vaadin-grid-filter>
                 </template>
                 <template>
-                  <select id="value" name="value" on-change="_changeSwitchValue" class="form-control">
-                    <option slot="filter" value$="{{item.value}}">{{item.value}}</option>
-                    <option value="true">True</option>
-                    <option value="false">False</option>
+                  <select id="value" value="{{item.value}}" name="value" on-change="_changeSwitchValue" class="form-control">
+
+                    <option value="true">true</option>
+                    <option value="false">false</option>
                   </select>
                 </template>
               </vaadin-grid-column>
-        
+
               <vaadin-grid-column resizable="" flex-grow="0">
                 <template class="header">
                   <span></span>
@@ -100,11 +100,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </vaadin-grid-column>
             </vaadin-grid>
         </div>
-  
+
         <!-- New users !-->
         <div class="box registrations">
           <center><h2>Global Variables</h2></center>
-          <vaadin-button on-tap="_addVariable">Add variable</vaadin-button>                  
+          <vaadin-button on-tap="_addVariable">Add variable</vaadin-button>
           <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_variables]]">
             <vaadin-grid-column resizable="">
               <template class="header">
@@ -119,8 +119,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
               <template>{{item.value}}</template>
             </vaadin-grid-column>
-  
-  
+
+
             <vaadin-grid-column resizable="" flex-grow="0">
               <template class="header">
                 <span></span>
@@ -134,7 +134,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div class="box registrations">
           <center><h2>Offline Maps</h2></center>
-          <vaadin-button on-tap="_addOfflineMap">Add offline map</vaadin-button>                  
+          <vaadin-button on-tap="_addOfflineMap">Add offline map</vaadin-button>
           <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_maps]]">
             <vaadin-grid-column resizable="">
               <template class="header">
@@ -142,7 +142,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
               <template>{{item.realId}} ({{item.name}})</template>
             </vaadin-grid-column>
-  
+
             <vaadin-grid-column resizable="" flex-grow="0">
               <template class="header">
                 <span></span>

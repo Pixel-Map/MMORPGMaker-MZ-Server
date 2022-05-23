@@ -192,7 +192,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     var ironAjax = Polymer.dom(this.root).querySelector("#ajaxGetServer");
     ironAjax.method = "GET";
     ironAjax.url = window.projectUrl + "/api/admin/server/";
-    console.log(this.authSession)
     ironAjax.headers = {
       "X-Access-Token": this.authSession.token,
       "X-Socket-ID": window.socket.id

@@ -1,7 +1,6 @@
 import { isTokenValid } from '../../core/security';
 import MMO_Core from '../../core/mmo_core';
 
-const gamedata = require('../../core/gamedata');
 const router = require('express').Router();
 const mmoCore = MMO_Core.getInstance();
 /*****************************
@@ -12,7 +11,7 @@ const mmoCore = MMO_Core.getInstance();
 router.get('/', isTokenValid, function (req, res) {
     const payload = {
         serverConfig: mmoCore.database.SERVER_CONFIG,
-        gameData: gamedata.data,
+        gameData: mmoCore.gamedata.data,
     };
 
     res.status(200).send(payload);
@@ -20,7 +19,6 @@ router.get('/', isTokenValid, function (req, res) {
 
 // Send back the configurations of the server
 router.patch('/:type', isTokenValid, function (req, res) {
-    console.log(req);
     if (!req.body) {
         return;
     }

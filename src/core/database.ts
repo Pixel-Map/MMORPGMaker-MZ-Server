@@ -14,17 +14,18 @@ export default class Database {
         this.logger = logger;
     }
     private orm: MikroORM;
-    public SERVER_CONFIG = {
+    public SERVER_CONFIG: ServerConfig = {
+        id: 1,
         newPlayerDetails: {
             permission: 0,
             mapId: 1,
             x: 5,
             y: 5,
         },
-        globalSwitches: {},
-        partySwitches: {},
-        globalVariables: {},
-        offlineMaps: {},
+        globalSwitches: new Map(),
+        partySwitches: new Map(),
+        globalVariables: new Map(),
+        offlineMaps: new Map(),
     };
 
     async initialize() {
@@ -240,48 +241,58 @@ export default class Database {
         let serverConfig = await serverConfigRepository.findOne({ id: 1 });
         if (!serverConfig) {
             serverConfig = serverConfigRepository.create({
-                mapId: this.SERVER_CONFIG.newPlayerDetails.mapId,
-                permission: this.SERVER_CONFIG.newPlayerDetails.permission,
-                x: this.SERVER_CONFIG.newPlayerDetails.x,
-                y: this.SERVER_CONFIG.newPlayerDetails.y,
+                id: 1,
+                newPlayerDetails: {
+                    mapId: this.SERVER_CONFIG.newPlayerDetails.mapId,
+                    permission: this.SERVER_CONFIG.newPlayerDetails.permission,
+                    x: this.SERVER_CONFIG.newPlayerDetails.x,
+                    y: this.SERVER_CONFIG.newPlayerDetails.y,
+                },
             });
             serverConfigRepository.persistAndFlush(serverConfig);
         }
 
-        this.SERVER_CONFIG.newPlayerDetails = serverConfig;
+        this.SERVER_CONFIG = serverConfig;
         console.log(this.SERVER_CONFIG);
     }
 
-    changeConfig(type, payload, callback) {
+    async changeConfig(type, payload, callback) {
         console.log(payload);
-        // let query = r.db('mmorpg').table('config')(0);
-        //
-        // if (type === 'globalSwitches') {
-        //     query = query.update({ globalSwitches: r.literal(payload) });
-        // } else if (type === 'partySwitches') {
-        //     query = query.update({ partySwitches: r.literal(payload) });
-        // } else if (type === 'offlineMaps') {
-        //     query = query.update({ offlineMaps: r.literal(payload) });
-        // } else if (type === 'globalVariables') {
-        //     query = query.update({ globalVariables: r.literal(payload) });
-        // } else if (type === 'newPlayerDetails') {
-        //     query = query.update({ newPlayerDetails: r.literal(payload) });
-        // }
-        //
-        // query
-        //     .run(conn)
-        //     .then(function (cursor) {
-        //         return cursor;
-        //     })
-        //     .then(() => {
-        //         this.reloadConfig(() => {
-        //             console.log('[I] Server configuration changes saved.');
-        //         });
-        //         callback();
-        //     })
-        //     .finally(() => {
-        //         conn.close();
-        //     });
+        const em = this.orm.em.fork();
+        const serverConfigRepository = em.getRepository(ServerConfig);
+        const serverConfig = await serverConfigRepository.findOne({ id: 1 });
+        switch (type) {
+            case 'newPlayerDetails': {
+                serverConfig.newPlayerDetails = {
+                    x: payload.x,
+                    y: payload.y,
+                    mapId: payload.mapId,
+                    permission: payload.permission,
+                };
+                break;
+            }
+            case 'globalSwitches': {
+                serverConfig.globalSwitches = payload;
+                break;
+            }
+            case 'globalVariables': {
+                serverConfig.globalVariables = payload;
+                break;
+            }
+            case 'offlineMaps': {
+                serverConfig.offlineMaps = payload;
+                break;
+            }
+            case 'partySwitches': {
+                serverConfig.partySwitches = payload;
+                break;
+            }
+        }
+        await serverConfigRepository.persistAndFlush(serverConfig);
+        this.logger.info('Updated config details successfully!');
+
+        await this.reloadConfig();
+        callback();
     }
 
     saveConfig() {

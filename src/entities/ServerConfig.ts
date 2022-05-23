@@ -9,22 +9,25 @@ export class ServerConfig {
     @PrimaryKey()
     id!: number;
 
-    @Property({ default: 0 })
+    @Property({})
+    newPlayerDetails: NewPlayerDetailsInterface;
+
+    @Property({ type: 'json', default: '{}' })
+    globalSwitches: Map<string, boolean>;
+
+    @Property({ type: 'json', default: '{}' })
+    partySwitches: Map<string, boolean>;
+
+    @Property({ type: 'json', default: '{}' })
+    globalVariables: Map<string, number>;
+
+    @Property({ type: 'json', default: '{}' })
+    offlineMaps: Map<string, boolean>;
+}
+
+interface NewPlayerDetailsInterface {
     permission: number;
-
-    @Property({ default: 0 })
     mapId: number;
-
-    @Property({ default: 0 })
     x: number;
-
-    @Property({ default: 0 })
     y: number;
 }
-//
-//
-// passwordRequired: true,
-//     globalSwitches: {},
-// partySwitches: {},
-// globalVariables: {},
-// offlineMaps: {},
