@@ -234,36 +234,27 @@ export default class Database {
     }
 
     /// ////////////// SERVER
-    async reloadConfig() {
+    async reloadConfigFromDatabase() {
         this.logger.info('Reloading Config');
         const em = this.orm.em.fork();
         const serverConfigRepository = em.getRepository(ServerConfig);
         let serverConfig = await serverConfigRepository.findOne({ id: 1 });
+
+        // If Config doesn't exist, use default!
         if (!serverConfig) {
-            serverConfig = serverConfigRepository.create({
-                id: 1,
-                newPlayerDetails: {
-                    mapId: this.SERVER_CONFIG.newPlayerDetails.mapId,
-                    permission: this.SERVER_CONFIG.newPlayerDetails.permission,
-                    x: this.SERVER_CONFIG.newPlayerDetails.x,
-                    y: this.SERVER_CONFIG.newPlayerDetails.y,
-                },
-            });
+            serverConfig = serverConfigRepository.create(this.SERVER_CONFIG);
             serverConfigRepository.persistAndFlush(serverConfig);
         }
 
         this.SERVER_CONFIG = serverConfig;
-        console.log(this.SERVER_CONFIG);
     }
 
     async changeConfig(type, payload, callback) {
-        console.log(payload);
-        const em = this.orm.em.fork();
-        const serverConfigRepository = em.getRepository(ServerConfig);
-        const serverConfig = await serverConfigRepository.findOne({ id: 1 });
+        this.logger.info('Updating server config!');
+
         switch (type) {
             case 'newPlayerDetails': {
-                serverConfig.newPlayerDetails = {
+                this.SERVER_CONFIG.newPlayerDetails = {
                     x: payload.x,
                     y: payload.y,
                     mapId: payload.mapId,
@@ -272,40 +263,31 @@ export default class Database {
                 break;
             }
             case 'globalSwitches': {
-                serverConfig.globalSwitches = payload;
+                this.SERVER_CONFIG.globalSwitches = payload;
                 break;
             }
             case 'globalVariables': {
-                serverConfig.globalVariables = payload;
+                this.SERVER_CONFIG.globalVariables = payload;
                 break;
             }
             case 'offlineMaps': {
-                serverConfig.offlineMaps = payload;
+                this.SERVER_CONFIG.offlineMaps = payload;
                 break;
             }
             case 'partySwitches': {
-                serverConfig.partySwitches = payload;
+                this.SERVER_CONFIG.partySwitches = payload;
                 break;
             }
         }
-        await serverConfigRepository.persistAndFlush(serverConfig);
-        this.logger.info('Updated config details successfully!');
-
-        await this.reloadConfig();
+        await this.saveConfig();
         callback();
     }
 
-    saveConfig() {
-        // r.db('mmorpg')
-        //     .table('config')(0)
-        //     .update(this.SERVER_CONFIG)
-        //     .run(conn)
-        //     .then(() => {
-        //         console.log('[I] Server configuration changes saved.');
-        //     })
-        //     .finally(() => {
-        //         conn.close();
-        //     });
+    async saveConfig() {
+        const em = this.orm.em.fork();
+        const serverConfigRepository = em.getRepository(ServerConfig);
+        serverConfigRepository.persistAndFlush(this.SERVER_CONFIG);
+        this.logger.info('Saved Server Config!');
     }
 
     close() {
