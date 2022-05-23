@@ -61,7 +61,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
       }
     </style>
-
+    
     <app-localstorage-document key="tradingCrmSession" data="{{authSession}}"></app-localstorage-document>
     <iron-ajax method="GET" on-response="_platformLoaded" on-error="_signOut"></iron-ajax>
 
@@ -109,7 +109,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 
   _signIn(data) {
-
     this.authSession = data.detail;
 
     this._loadPage("signedin");
