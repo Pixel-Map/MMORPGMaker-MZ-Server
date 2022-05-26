@@ -139,6 +139,7 @@ export default class Database {
 
     /// ////////////// BANKS
     getBanks(callback) {
+        callback();
         // r.db('mmorpg')
         //     .table('banks')
         //     .run(conn)
@@ -154,6 +155,7 @@ export default class Database {
     }
 
     getBank(bankName, callback) {
+        callback();
         // r.db('mmorpg')
         //     .table('banks')
         //     .filter({ name: bankName })
@@ -170,6 +172,7 @@ export default class Database {
     }
 
     getBankById(bankId, callback) {
+        callback();
         // r.db('mmorpg')
         //     .table('banks')
         //     .get(bankId)
@@ -186,6 +189,7 @@ export default class Database {
     }
 
     saveBank(bank, callback) {
+        callback();
         // r.db('mmorpg')
         //     .table('banks')
         //     .get(bank.id)
@@ -200,6 +204,7 @@ export default class Database {
     }
 
     createBank(payload, callback) {
+        callback();
         // const content = payload.type === 'global' ? { items: {}, weapons: {}, armors: {}, gold: 0 } : {};
         // const template = {
         //     name: payload.name,
@@ -220,6 +225,7 @@ export default class Database {
     }
 
     deleteBank(bankId, callback) {
+        callback();
         // r.db('mmorpg')
         //     .table('banks')
         //     .get(bankId)
