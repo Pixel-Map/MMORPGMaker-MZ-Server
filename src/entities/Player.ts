@@ -41,4 +41,10 @@ export class Player {
 
     @OneToOne(() => Stats, (stats) => stats.user)
     stats?: Stats;
+
+    @Property({ type: 'json', default: '{}' })
+    variables: JSON;
+
+    @Property({ type: 'json', default: '{}' })
+    switches: JSON; // Yes it's actually armors.
 }
