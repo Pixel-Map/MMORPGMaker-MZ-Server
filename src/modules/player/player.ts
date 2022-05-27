@@ -94,6 +94,7 @@ export class Player {
                 client.playerData.stats.armors = payload.armors;
                 client.playerData.stats.weapons = payload.weapons;
                 await database.savePlayer(client.playerData);
+                await this.refreshData(client);
             });
 
             client.on('player_update_skin', function (payload) {

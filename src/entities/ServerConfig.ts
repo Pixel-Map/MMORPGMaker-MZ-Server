@@ -19,7 +19,7 @@ export class ServerConfig {
     partySwitches: Map<string, boolean>;
 
     @Property({ type: 'json', default: '{}' })
-    globalVariables: Map<string, number>;
+    globalVariables: Map<string, any>;
 
     @Property({ type: 'json', default: '{}' })
     offlineMaps: Map<string, boolean>;

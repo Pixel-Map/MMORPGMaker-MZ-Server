@@ -127,7 +127,7 @@ export default class Database {
         const userRepository = em.getRepository(Player);
         const user = await userRepository.find({ username: playerData.username }, { limit: 1 });
         wrap(user[0]).assign(playerData, { em: em });
-        userRepository.persistAndFlush(user[0]);
+        await userRepository.persistAndFlush(user[0]);
     }
 
     async savePlayerById(playerData) {
