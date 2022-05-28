@@ -111,6 +111,10 @@ export default class Database {
             password: security.hashPassword(userDetails.password.toLowerCase()),
             skin: skin,
             stats: stats,
+            mapId: this.SERVER_CONFIG.newPlayerDetails.mapId,
+            x: this.SERVER_CONFIG.newPlayerDetails.x,
+            y: this.SERVER_CONFIG.newPlayerDetails.y,
+            permission: this.SERVER_CONFIG.newPlayerDetails.permission,
         });
 
         userRepository.persistAndFlush(user);
