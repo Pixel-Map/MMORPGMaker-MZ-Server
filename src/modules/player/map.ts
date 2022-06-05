@@ -1,4 +1,5 @@
 import MMO_Core from '../../core/mmo_core';
+import { PocketEvent } from '../../entities/PocketEvent';
 
 export class Map {
     mmoCore: MMO_Core;
@@ -119,6 +120,9 @@ export class Map {
                 if (npc && npc.uniqueId) {
                     gameworld.setNpcBusyStatus(npc.uniqueId, false);
                 }
+            });
+            client.on('event_placed', function (event: PocketEvent) {
+                gameworld.spawnPocketEvent(event);
             });
         });
     }

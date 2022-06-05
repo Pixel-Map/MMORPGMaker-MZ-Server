@@ -6,6 +6,7 @@ import { Stats } from '../entities/Stats';
 import pino from 'pino';
 import Logger = pino.Logger;
 import { ServerConfig } from '../entities/ServerConfig';
+import { PocketEvent } from '../entities/PocketEvent';
 const security = require('./security');
 
 export default class Database {
@@ -241,6 +242,22 @@ export default class Database {
         //     .finally(function () {
         //         conn.close();
         //     });
+    }
+
+    // Begin tracking a new persistent event (i.e. an item placed on the map)
+    async addPocketEvent(eventData: PocketEvent) {
+        const em = this.orm.em.fork();
+        const pocketEventRepository = em.getRepository(PocketEvent);
+
+        const event = pocketEventRepository.create(eventData);
+
+        pocketEventRepository.persistAndFlush(event);
+    }
+
+    async getPocketEvents(): Promise<PocketEvent[]> {
+        const em = this.orm.em.fork();
+        const pocketEventRepository = em.getRepository(PocketEvent);
+        return pocketEventRepository.findAll();
     }
 
     /// ////////////// SERVER

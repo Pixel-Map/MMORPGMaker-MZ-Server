@@ -1,6 +1,7 @@
 import MMO_Core from './mmo_core';
 import pino from 'pino';
 import Logger = pino.Logger;
+import { PocketEvent } from '../entities/PocketEvent';
 
 /*****************************
  GAME WORLD by Axel Fiolle
@@ -29,6 +30,7 @@ export default class GameWorld {
     private socket;
     private gamedata;
     private rpgmaker;
+    private database;
     private logger: Logger;
 
     constructor(logger: Logger) {
@@ -37,6 +39,7 @@ export default class GameWorld {
 
     initialize(mmoCore: MMO_Core) {
         this.socket = mmoCore.socket;
+        this.database = mmoCore.database;
 
         this.gamedata = mmoCore.gamedata;
         this.rpgmaker = mmoCore.rpgmaker;
@@ -70,6 +73,16 @@ export default class GameWorld {
         return this.gameMaps.find((map) => map.isSummonMap);
     }
 
+    // Return the map that stores all of the pocket events
+    getPocketEventsMap() {
+        if (process.env.POCKET_EVENTS_MAP_ID) {
+            return this.gameMaps.find((map) => map.mapId == 3);
+        } else {
+            this.logger.error('Could not find pocket events map!');
+            return false;
+        }
+    }
+
     getInstanceByUniqueId(uniqueId) {
         return this.instancedMaps.find((instance) => instance.uniqueId === uniqueId);
     }
@@ -84,7 +97,8 @@ export default class GameWorld {
     }
 
     isMapInstanceable(map) {
-        return map.note && map.note.toUpperCase().includes('<SYNC>');
+        // return map.note && map.note.toUpperCase().includes('<SYNC>');
+        return true;
     }
 
     // NPC helpers
@@ -274,6 +288,7 @@ export default class GameWorld {
             });
             this.fetchConnectedNpcs(_map);
             this.startInstanceLifecycle(mapId);
+            this.reloadPersistentEvents(_map);
         }
     };
 
@@ -438,6 +453,52 @@ export default class GameWorld {
 
         security.createLog(
             `[WORLD] Spawned NPC ${_generatedNpc.uniqueId} (${coords.x};${coords.y}) by "${_generatedNpc.initiator}"`,
+        );
+        this.socket.emitToAll('npcSpawn', this.getNpcByUniqueId(_generatedNpc.uniqueId));
+
+        return _spawnedIndex;
+    };
+
+    spawnPocketEvent = (event: PocketEvent) => {
+        const npcSummonId = event.pItemIndex;
+        const pageIndex = 0;
+
+        const pocketEventsMap = this.getPocketEventsMap();
+        if (!event || !event.x || !event.y || !event.mapId || !pocketEventsMap) {
+            this.logger.error('Unable to spawnPocketEvent! Missing coords or getPocketEventsMap failed!');
+            return;
+        }
+
+        const _npcToReplicate = pocketEventsMap.events.find(
+            (npc) => npc && (npc.id === npcSummonId || (npc.summonId && npc.summonId === npcSummonId)),
+        );
+
+        const _targetInstance = this.getInstanceByMapId(event.mapId);
+
+        if (!_npcToReplicate || !_targetInstance) return;
+
+        const _generatedNpc = this.makeConnectedNpc(_npcToReplicate, _targetInstance, 0, '0');
+        if (!_generatedNpc) return;
+        const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
+        Object.assign(_generatedNpc, {
+            uniqueId: `Npc${uniqueIntegerId}#${this.getConnectedNpcs(event.mapId).length}@${event.mapId}`,
+            summonId: npcSummonId,
+            id: uniqueIntegerId,
+            eventId: uniqueIntegerId,
+            summonable: true,
+            mapId: event.mapId,
+        });
+
+        this.attachNode(_generatedNpc);
+        this.spawnedUniqueIds.push(_generatedNpc.uniqueId);
+        const _spawnedIndex = this.spawnedUniqueIds.indexOf(_generatedNpc.uniqueId);
+        this.getConnectedNpcs(event.mapId).push(_generatedNpc);
+
+        this.getNpcByUniqueId(_generatedNpc.uniqueId).x = event.x || 1;
+        this.getNpcByUniqueId(_generatedNpc.uniqueId).y = event.y || 1;
+        this.database.addPocketEvent(event);
+        this.logger.info(
+            `[WORLD] Spawned PocketEvent ${_generatedNpc.uniqueId} (${event.x};${event.y}) by "${_generatedNpc.initiator}"`,
         );
         this.socket.emitToAll('npcSpawn', this.getNpcByUniqueId(_generatedNpc.uniqueId));
 
@@ -666,4 +727,14 @@ export default class GameWorld {
         this.logger.warn('I do not exist!  Please implement me');
         return null;
     }
+
+    reloadPersistentEvents = (mapId) => {
+        this.logger.info('[POCKETEVENTS] Loading persistent pocket events');
+        this.database.getPocketEvents().then((events) => {
+            for (const event of events) {
+                this.spawnPocketEvent(event);
+            }
+        });
+        this.logger.info('[POCKETEVENTS] Finished loading persistent pocket events!');
+    };
 }
