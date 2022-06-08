@@ -41,8 +41,8 @@ describe('User authentication', () => {
             done();
             const expectedPlayer = {
                 username: 'testuser',
-                x: 0,
-                y: 0,
+                x: 5,
+                y: 5,
                 status: null,
                 mapId: 1,
                 permission: 0,

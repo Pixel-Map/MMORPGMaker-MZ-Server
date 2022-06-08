@@ -34,7 +34,8 @@
             "^.+\\.(js|jsx)$": "babel-jest"
         },
         "testPathIgnorePatterns": [
-            "dist"
+            "dist",
+            "src/admin_dev/bower_components"
         ]
     },
     "engines": {
