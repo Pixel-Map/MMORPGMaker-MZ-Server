@@ -1,6 +1,7 @@
 import MMO_Core from '../../core/mmo_core';
 
 import * as security from '../../core/security';
+import { default as axios } from 'axios';
 
 export class Auth {
     mmoCore: MMO_Core;
@@ -89,6 +90,104 @@ export class Auth {
                 client.broadcast.to(client.lastMap).emit('map_exited', client.id);
                 client.leave(client.lastMap);
             });
+
+            // Login via Moralis
+            client.on('loginMoralis', async (data) => {
+                if (data.sessionToken === undefined) {
+                    return this.loginError(client, 'Missing session token!');
+                }
+                const axios = require('axios').default;
+                let userId = '';
+                let moralisData;
+
+                // Validate session token
+                await axios
+                    .get('https://orrqu4njimxw.usemoralis.com:2053/server/sessions', {
+                        headers: {
+                            'X-Parse-Application-Id': process.env.MORALIS_APPLICATION_ID,
+                            'X-Parse-Master-Key': process.env.MORALIS_MASTER_KEY,
+                            'content-type': 'application/x-www-form-urlencoded',
+                        },
+                        data: `where={"sessionToken": "${data.sessionToken}"}`,
+                    })
+                    .then(function (response) {
+                        // handle success
+                        userId = response.data.results[0].user.objectId;
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        console.log(error);
+                    })
+                    .then(function () {
+                        // always executed
+                    });
+
+                // Get Ethereum Address
+                await axios
+                    .get('https://orrqu4njimxw.usemoralis.com:2053/server/classes/_User', {
+                        headers: {
+                            'X-Parse-Application-Id': process.env.MORALIS_APPLICATION_ID,
+                            'X-Parse-Master-Key': process.env.MORALIS_MASTER_KEY,
+                            'content-type': 'application/x-www-form-urlencoded',
+                        },
+                        data: `where={"objectId": "${userId}"}`,
+                    })
+                    .then(function (response) {
+                        // handle success
+                        moralisData = response.data.results[0];
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        console.log(error);
+                    })
+                    .then(function () {
+                        // always executed
+                    });
+
+                // Attempt to get ENS
+                let ens = '';
+                await axios
+                    .get(`https://deep-index.moralis.io/api/v2/resolve/${moralisData.ethAddress}/reverse`, {
+                        headers: {
+                            accept: 'application/json',
+                            'X-API-Key': process.env.MORALIS_API_KEY,
+                        },
+                    })
+                    .then(function (response) {
+                        // handle success
+                        ens = response.data.name;
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        this.mmoCore.logger.info('No ENS found for player, using first 10 of eth address!');
+                        ens = moralisData.ethAddress.slice(0, 10);
+                    })
+                    .then(function () {
+                        // always executed
+                    });
+
+                let user = await database.findUser({ username: moralisData.ethAddress });
+
+                if (user == undefined) {
+                    await database.registerUser({
+                        username: moralisData.ethAddress,
+                        password: 'moralis',
+                        ens: ens,
+                    });
+                    user = await database.findUser({ username: moralisData.ethAddress });
+                }
+
+                const existingPlayer = await mmoCore.socket.modules.player.getPlayer(moralisData.ethAddress);
+                if (user.ens != ens) {
+                    console.log("Player's ENS changed, updating!");
+                    user.ens = ens;
+                    database.savePlayer(user);
+                }
+                if (existingPlayer !== null) {
+                    return this.loginError(client, 'Player is already connected.');
+                }
+                return this.loginSuccess(client, user, mmoCore);
+            });
         });
     }
 
@@ -114,6 +213,7 @@ export class Auth {
         client.emit('login_success', { msg: details });
         client.playerData = details;
         mmoCore.gameworld.attachNode(client.playerData, true);
+
         mmoCore.logger.info(client.playerData.username + ' connected to the game');
     }
 

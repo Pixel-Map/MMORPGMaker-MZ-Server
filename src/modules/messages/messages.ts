@@ -72,7 +72,8 @@ export class Messages {
                     return this.checkCommand(message.substr(1, message.length), client);
                 }
 
-                this.sendToMap(client.lastMap, client.playerData.username, message, client.id);
+                const name = client.playerData.ens ? client.playerData.ens : client.playerData.username;
+                this.sendToMap(client.lastMap, name, message, client.id);
             });
         });
     }

@@ -7,6 +7,7 @@ import pino from 'pino';
 import Logger = pino.Logger;
 import { ServerConfig } from '../entities/ServerConfig';
 import { PocketEvent } from '../entities/PocketEvent';
+import { User } from '@sentry/node';
 const security = require('./security');
 
 export default class Database {
@@ -118,7 +119,7 @@ export default class Database {
             permission: this.SERVER_CONFIG.newPlayerDetails.permission,
         });
 
-        userRepository.persistAndFlush(user);
+        await userRepository.persistAndFlush(user);
     }
 
     async savePlayer(playerData) {
@@ -274,6 +275,7 @@ export default class Database {
         }
 
         this.SERVER_CONFIG = serverConfig;
+        this.logger.info('Config reloaded!');
     }
 
     async changeConfig(type, payload, callback) {

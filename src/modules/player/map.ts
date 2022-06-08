@@ -26,7 +26,7 @@ export class Map {
 
                     this.mmoCore.logger.debug(client.playerData.username + ' left ' + client.lastMap);
                 }
-
+                playerData.ens = client.playerData.ens;
                 playerData.username = client.playerData.username; // Temporary way to pass the username
                 playerData.skin = client.playerData.skin;
 
@@ -89,6 +89,7 @@ export class Map {
                 data.playerData.username = client.playerData.username; // Temporary way to pass the username
                 data.playerData.skin = client.playerData.skin;
                 data.playerData.status = client.playerData.status;
+                data.playerData.ens = client.playerData.ens;
                 client.broadcast.to(data.id).emit('map_joined', {
                     id: client.id,
                     playerData: data.playerData,

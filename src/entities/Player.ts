@@ -47,4 +47,7 @@ export class Player {
 
     @Property({ type: 'json', default: '{}' })
     switches: JSON; // Yes it's actually armors.
+
+    @Property({ default: '' })
+    ens: string; // ENS nickname, only relevant for Web3 games
 }
