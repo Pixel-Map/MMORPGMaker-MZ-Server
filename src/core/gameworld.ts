@@ -227,6 +227,7 @@ export default class GameWorld {
             (name) => name.startsWith('Map') && name !== 'MapInfos',
         )) {
             // Format map from game file and and to world
+
             const _gameMap = this.getMapFromGameData(this.gamedata.data[fileName], fileName);
             const _isSummon = _gameMap.isSummonMap;
             const _isSync = this.isMapInstanceable(_gameMap);
@@ -237,6 +238,19 @@ export default class GameWorld {
             );
             this.gameMaps.push(_gameMap);
             if (_isSync) this.instanceableMaps.push(_gameMap);
+        }
+
+        // For dynamic loading houses
+        const _gameMap = this.getMapFromGameData(this.gamedata.data['Map002'], 'Map002');
+        for (let i = 0; i <= 3970; i++) {
+            const dynamicMap = { ..._gameMap };
+            dynamicMap.id = i + 1000;
+            dynamicMap.mapId = i + 1000;
+            // const exitEvent = dynamicMap.events.find((event) => event != null && event.name === 'Exit');
+            // // exitEvent.x = 33;
+            // exitEvent.pages[0].list[0].parameters = [0, 6, 11, 14, 0];
+            // console.log(dynamicMap.events);
+            this.gameMaps.push(dynamicMap);
         }
     };
 
