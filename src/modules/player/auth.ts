@@ -1,7 +1,6 @@
 import MMO_Core from '../../core/mmo_core';
 
 import * as security from '../../core/security';
-import { default as axios } from 'axios';
 
 export class Auth {
     mmoCore: MMO_Core;
@@ -159,7 +158,7 @@ export class Auth {
                     })
                     .catch(function (error) {
                         // handle error
-                        this.mmoCore.logger.info('No ENS found for player, using first 10 of eth address!');
+                        mmoCore.logger.info('No ENS found for player, using first 10 of eth address!');
                         ens = moralisData.ethAddress.slice(0, 10);
                     })
                     .then(function () {
