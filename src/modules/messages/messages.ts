@@ -14,6 +14,8 @@ import { Npc } from './npc';
 import { Pa } from './pa';
 import { W } from './w';
 
+const { Client, Intents } = require('discord.js');
+
 export class Messages {
     mmoCore: MMO_Core;
     io;
@@ -39,6 +41,7 @@ export class Messages {
     npc: Npc;
     pa: Pa;
     w: W;
+    discord;
 
     constructor(mmoCore: MMO_Core) {
         this.mmoCore = mmoCore;
@@ -61,9 +64,25 @@ export class Messages {
         this.npc = new Npc(this);
         this.pa = new Pa(this);
         w: new W(this);
+        if (process.env.DISCORD_ENABLED) {
+            this.discord = new Client({
+                intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
+            });
+            this.discord.login(process.env.DISCORD_API_TOKEN);
+
+            this.discord.on('message', async (message) => {
+                if (message.author.bot) return;
+                this.io.emit('new_message', {
+                    username: message.author.username,
+                    msg: message.content,
+                    color: this.COLOR_PARTY,
+                });
+                console.log();
+            });
+        }
 
         io.on('connect', (client) => {
-            client.on('new_message', (message) => {
+            client.on('new_message', async (message) => {
                 if (client.playerData === undefined) {
                     return;
                 }
@@ -73,10 +92,16 @@ export class Messages {
                 }
 
                 const name = client.playerData.ens ? client.playerData.ens : client.playerData.username;
+
                 this.sendToMap(client.lastMap, name, message, client.id);
+                if (process.env.DISCORD_ENABLED) {
+                    const channel = await this.discord.channels.fetch(process.env.DISCORD_CHANNEL);
+                    channel.send('**' + name + '**: "' + message + '"');
+                }
             });
         });
     }
+
     // ---------------------------------------
     // ---------- EXPOSED FUNCTIONS
     // ---------------------------------------
