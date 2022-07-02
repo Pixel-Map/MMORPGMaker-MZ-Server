@@ -27,5 +27,26 @@ export default [
 				"socket.io-client": "io"
 			})
 		]
+	},
+	{
+		external: ["socket.io-client"],
+		input: 'src/plugins/mmo_core_player.ts',
+		output: [
+			{
+				file: `../js/plugins/MMO_Core_Player.js`,
+				name: 'MMO_Core_Player',
+				format: 'iife',
+				sourcemap: false,
+				banner: getMetadata("mmo_core_player"),
+			}
+		],
+		plugins: [
+			typescript(),
+			externalGlobals({
+				"rmmz": "window",
+				"socket.io-client": "io"
+			})
+		]
 	}
 ];
+
