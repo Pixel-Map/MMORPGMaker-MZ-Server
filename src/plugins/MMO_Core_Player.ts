@@ -1,15 +1,110 @@
 // @ts-nocheck
 import MMO_Core from './mmo_core';
 
-function MMO_Core_Player() {
-    // eslint-disable-next-line prefer-spread,prefer-rest-params
-    this.initialize.apply(this, arguments);
+class Core_Player  {
+
+    Player: {};
+    Parameters: any;
+    hasInitialized: boolean;
+    isCombatInitiator: boolean;
+
+    constructor() {
+        this.Player = {};
+        this.Parameters = PluginManager.parameters('MMO_Core_Player');
+        this.hasInitialized = false;
+        this.isCombatInitiator = false;
+
+
+    }
+
+    setHp = Game_BattlerBase.prototype.setHp;
+    setMp = Game_BattlerBase.prototype.setMp;
+    recoverAll = Game_BattlerBase.prototype.recoverAll
+    consumeItem = Game_Battler.prototype.consumeItem
+    gainItem = Game_Party.prototype.gainItem
+    changeEquip = Game_Actor.prototype.changeEquip;
+    initMembers = Game_CharacterBase.prototype.initMembers;
+    setBattlerImage = Game_Actor.prototype.setBattlerImage;
+    setCharacterImage = Game_Actor.prototype.setCharacterImage;
+    setFaceImage = Game_Actor.prototype.setFaceImage;
+    partyInit = Game_Party.prototype.initialize;
+
+    savePlayerStats() {
+        if ($gameActors['_data'][1] === undefined) {
+            return;
+        }
+
+        const equips = [];
+        for (let i = 0; i < $gameActors['_data'][1]['_equips'].length; i++) {
+            equips.push($gameActors['_data'][1]['_equips'][i]['_itemId']);
+        }
+        MMO_Core.socket.emit('player_update_stats', {
+            hp: $gameActors['_data'][1]['_hp'],
+            mp: $gameActors['_data'][1]['_mp'],
+            equips: equips,
+            skills: $gameActors['_data'][1]['_skills'],
+            level: $gameActors['_data'][1]['_level'],
+            exp: $gameActors['_data'][1]['_exp'],
+            classId: $gameActors['_data'][1]['_classId'],
+            gold: $gameParty['_gold'],
+            items: $gameParty['_items'],
+            armors: $gameParty['_armors'],
+            weapons: $gameParty['_weapons'],
+        });
+    };
+
+    getPlayerPos() {
+        return {
+            x: $gamePlayer['_x'],
+            y: $gamePlayer['_y'],
+            mapId: $gameMap['_mapId'],
+        };
+    };
+
+
+    updateSkin(payload) {
+        if (payload.type === 'sprite') {
+            this.Player['skin']['characterName'] = payload.characterName;
+            this.Player['skin']['characterIndex'] = payload.characterIndex;
+        }
+
+        MMO_Core.socket.emit('player_update_skin', payload);
+    };
+
+    updateBusy(newState) {
+        MMO_Core.socket.emit('player_update_busy', newState);
+    };
+
+
+
+    async refreshStats() {
+        if (this.Player['stats'] !== undefined) {
+            $gameParty._gold = MMO_Core_Player.Player['stats']['gold'];
+            $gameActors['_data'][1]._level = MMO_Core_Player.Player['stats']['level'];
+            $gameActors['_data'][1]._exp = MMO_Core_Player.Player['stats']['exp'];
+            $gameActors['_data'][1]._classId = MMO_Core_Player.Player['stats']['classId'];
+            $gameActors['_data'][1]._hp = MMO_Core_Player.Player['stats']['hp'];
+            $gameActors['_data'][1]._mp = MMO_Core_Player.Player['stats']['mp'];
+            $gameParty._weapons = MMO_Core_Player.Player['stats']['weapons'];
+            $gameParty._armors = MMO_Core_Player.Player['stats']['armors'];
+            $gameParty._items = MMO_Core_Player.Player['stats']['items'];
+            $gamePlayer._characterIndex = MMO_Core_Player.Player['skin']['characterIndex'];
+            $gamePlayer._characterName = MMO_Core_Player.Player['skin']['characterName'];
+        }
+
+        // @ts-ignore
+        if (MMO_Core_Party) {
+            // @ts-ignore
+            await MMO_Core_Party.refreshPartyStats();
+        }
+
+        // Game_Interpreter.prototype.refreshEventMiniLabel();
+    };
+
 }
 
-MMO_Core_Player.Player = {};
-MMO_Core_Player.Parameters = PluginManager.parameters('MMO_Core_Player');
-MMO_Core_Player.hasInitialized = false;
-MMO_Core_Player.isCombatInitiator = false;
+const MMO_Core_Player = new Core_Player();
+
 
 // ---------------------------------------
 // ---------- Native Functions Extending
@@ -55,6 +150,7 @@ DataManager.setupNewGame = function () {
         };
 
         MMO_Core_Player.consumeItem = Game_Battler.prototype.consumeItem;
+        // @ts-ignore
         Game_Battler.prototype.consumeItem = function (item, amount, includeEquip) {
             MMO_Core_Player.consumeItem.call(this, item, amount, includeEquip);
             MMO_Core_Player.savePlayerStats();
@@ -352,76 +448,5 @@ MMO_Core.socket.on('player_respawn', function (payload) {
     $gamePlayer.reserveTransfer(payload['mapId'], payload['x'], payload['y']);
     SceneManager.goto(Scene_Map);
 });
-
-// ---------------------------------------
-// ---------- Exposed Functions
-// ---------------------------------------
-
-MMO_Core_Player.updateSkin = function (payload) {
-    if (payload.type === 'sprite') {
-        MMO_Core_Player.Player['skin']['characterName'] = payload.characterName;
-        MMO_Core_Player.Player['skin']['characterIndex'] = payload.characterIndex;
-    }
-
-    MMO_Core.socket.emit('player_update_skin', payload);
-};
-
-MMO_Core_Player.updateBusy = function (newState) {
-    MMO_Core.socket.emit('player_update_busy', newState);
-};
-
-MMO_Core_Player.refreshStats = async function () {
-    if (MMO_Core_Player.Player['stats'] !== undefined) {
-        $gameParty._gold = MMO_Core_Player.Player['stats']['gold'];
-        $gameActors['_data'][1]._level = MMO_Core_Player.Player['stats']['level'];
-        $gameActors['_data'][1]._exp = MMO_Core_Player.Player['stats']['exp'];
-        $gameActors['_data'][1]._classId = MMO_Core_Player.Player['stats']['classId'];
-        $gameActors['_data'][1]._hp = MMO_Core_Player.Player['stats']['hp'];
-        $gameActors['_data'][1]._mp = MMO_Core_Player.Player['stats']['mp'];
-        $gameParty._weapons = MMO_Core_Player.Player['stats']['weapons'];
-        $gameParty._armors = MMO_Core_Player.Player['stats']['armors'];
-        $gameParty._items = MMO_Core_Player.Player['stats']['items'];
-        $gamePlayer._characterIndex = MMO_Core_Player.Player['skin']['characterIndex'];
-        $gamePlayer._characterName = MMO_Core_Player.Player['skin']['characterName'];
-    }
-
-    if (MMO_Core_Party) {
-        await MMO_Core_Party.refreshPartyStats();
-    }
-
-    // Game_Interpreter.prototype.refreshEventMiniLabel();
-};
-
-MMO_Core_Player.savePlayerStats = function () {
-    if ($gameActors['_data'][1] === undefined) {
-        return;
-    }
-
-    const equips = [];
-    for (let i = 0; i < $gameActors['_data'][1]['_equips'].length; i++) {
-        equips.push($gameActors['_data'][1]['_equips'][i]['_itemId']);
-    }
-    MMO_Core.socket.emit('player_update_stats', {
-        hp: $gameActors['_data'][1]['_hp'],
-        mp: $gameActors['_data'][1]['_mp'],
-        equips: equips,
-        skills: $gameActors['_data'][1]['_skills'],
-        level: $gameActors['_data'][1]['_level'],
-        exp: $gameActors['_data'][1]['_exp'],
-        classId: $gameActors['_data'][1]['_classId'],
-        gold: $gameParty['_gold'],
-        items: $gameParty['_items'],
-        armors: $gameParty['_armors'],
-        weapons: $gameParty['_weapons'],
-    });
-};
-
-MMO_Core_Player.getPlayerPos = function () {
-    return {
-        x: $gamePlayer['_x'],
-        y: $gamePlayer['_y'],
-        mapId: $gameMap['_mapId'],
-    };
-};
 
 export default MMO_Core_Player;
