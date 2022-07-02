@@ -1,6 +1,5 @@
 // @ts-nocheck
-
-import core from './mmo_core';
+import MMO_Core from './mmo_core';
 
 function MMO_Core_Player() {
     // eslint-disable-next-line prefer-spread,prefer-rest-params

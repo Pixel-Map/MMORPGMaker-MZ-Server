@@ -33,12 +33,12 @@ class Core {
     }
 }
 
-const core = new Core();
+const MMO_Core = new Core();
 
 // Enable the ability to start via touch
 TouchInput._onTouchStart = function (event) {
-    if (!core.allowTouch) return;
-    core._onTouchStart.call(this, event);
+    if (!MMO_Core.allowTouch) return;
+    MMO_Core._onTouchStart.call(this, event);
 };
 
-export default core;
+export default MMO_Core;
