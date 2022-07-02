@@ -1,4 +1,4 @@
-import typescript from '@rollup/plugin-typescript';
+import typescript from 'rollup-plugin-typescript2';
 import externalGlobals from "rollup-plugin-external-globals";
 import {readFileSync} from 'fs';
 
@@ -6,47 +6,36 @@ function getMetadata(name) {
 	return readFileSync(`${__dirname}/dist/${name}_metadata.js`) + '\n' + readFileSync('header.js', 'utf-8')
 }
 
+const pluginList = ['MMO_Core', 'MMO_Core_Player']
+let conf = []
+for (const plugin of pluginList) {
+	conf.push({
+		external: ["socket.io-client"],
+		input: `src/plugins/${plugin}.ts`,
+		output: [
+			{
+				file: `../js/plugins/${plugin}.js`,
+				name: `${plugin}`,
+				format: 'iife',
+				sourcemap: false,
+				banner: getMetadata(plugin),
+			}
+		],
+		plugins: [
+			typescript({
+				tsconfigOverride: {
+					compilerOptions: {
+						target: "es2022"
+					}
+				}
+			}),
+			externalGlobals({
+				"rmmz": "window",
+				"socket.io-client": "io"
+			}),
+		]
+	})
+}
+export default conf
 
-export default [
-	{
-		external: ["socket.io-client"],
-		input: 'src/plugins/mmo_core.ts',
-		output: [
-			{
-				file: `../js/plugins/MMO_Core.js`,
-				name: 'MMO_Core',
-				format: 'iife',
-				sourcemap: false,
-				banner: getMetadata("mmo_core"),
-			}
-		],
-		plugins: [
-			typescript(),
-			externalGlobals({
-				"rmmz": "window",
-				"socket.io-client": "io"
-			})
-		]
-	},
-	{
-		external: ["socket.io-client"],
-		input: 'src/plugins/mmo_core_player.ts',
-		output: [
-			{
-				file: `../js/plugins/MMO_Core_Player.js`,
-				name: 'MMO_Core_Player',
-				format: 'iife',
-				sourcemap: false,
-				banner: getMetadata("mmo_core_player"),
-			}
-		],
-		plugins: [
-			typescript(),
-			externalGlobals({
-				"rmmz": "window",
-				"socket.io-client": "io"
-			})
-		]
-	}
-];
 
