@@ -1,3 +1,5 @@
+import { io } from 'socket.io-client';
+
 class Core {
     socket: any;
     Parameters: any;
@@ -6,7 +8,6 @@ class Core {
 
     constructor() {
         this.Parameters = PluginManager.parameters('MMO_Core');
-        // @ts-ignore
         this.socket = io(String(this.Parameters['Server Location']));
         this.allowTouch = true;
 
@@ -24,13 +25,11 @@ class Core {
             this.addOptionsCommand();
         };
 
-        TouchInput._onTouchStart = (event) => {
-            if (!this.allowTouch) return;
-            // @ts-ignore
-            MMO_Core._onTouchStart.call(this, event);
-        };
-
         this._onTouchStart = TouchInput._onTouchStart;
+        TouchInput._onTouchStart = function (event) {
+            if (!this.allowTouch) return;
+            this._onTouchStart.call(this, event);
+        };
     }
 
     sendMessage(message) {

@@ -54,7 +54,7 @@
     "clean": "rimraf dist/",
     "copy-files": "copyfiles -u 1 \"src/admin/**/*\" dist/",
     "lint": "eslint .",
-    "build": "npm run clean && npm run copy-files && tsc && mz-mtdt -i src/plugins/mmo_core_metadata.yaml -o dist/mmo_core_metadata.js && rollup -c",
+    "build": "npm run clean && npm run copy-files && tsc && mz-mtdt -i src/plugins/mmo_core.yaml -o dist/mmo_core_metadata.js && mz-mtdt -i src/plugins/mmo_core_player.yaml -o dist/mmo_core_player_metadata.js && rollup -c",
     "start": "node dist/mmo.js",
     "tsnode": "ts-node src/mmo.ts",
     "dev": "nodemon src/mmo.ts",

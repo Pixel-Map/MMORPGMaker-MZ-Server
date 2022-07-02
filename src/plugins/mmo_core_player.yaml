@@ -1,0 +1,16 @@
+target: MZ
+author: Samuel Cardiillo, Andaroth, Ken Erwin
+description: MMORPG Maker MV - Core Handling Player
+help: |-
+  This plugin does not provide plugin commands.
+params:
+  - name: Mouse Movements
+    text: Mouse Movements
+    default: false
+    description: Allow the usage of the mouse to move the player
+    type: boolean
+  - name: Use Native Respawn
+    text: Use Native Respawn
+    default: false
+    description: Use the native respawn when player is dead
+    type: boolean
