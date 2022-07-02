@@ -4,12 +4,13 @@ class Core {
     socket: any;
     Parameters: any;
     allowTouch: boolean;
-    private _onTouchStart: any;
+    _onTouchStart: any;
 
     constructor() {
         this.Parameters = PluginManager.parameters('MMO_Core');
         this.socket = io(String(this.Parameters['Server Location']));
         this.allowTouch = true;
+        this._onTouchStart = TouchInput._onTouchStart;
 
         // Wildcard for any disconnection from the server.
         this.socket.on('disconnect', (reason) => {
@@ -24,12 +25,6 @@ class Core {
             this.addOriginalCommands();
             this.addOptionsCommand();
         };
-
-        this._onTouchStart = TouchInput._onTouchStart;
-        TouchInput._onTouchStart = function (event) {
-            if (!this.allowTouch) return;
-            this._onTouchStart.call(this, event);
-        };
     }
 
     sendMessage(message) {
@@ -38,4 +33,12 @@ class Core {
     }
 }
 
-export default new Core();
+const core = new Core();
+
+// Enable the ability to start via touch
+TouchInput._onTouchStart = function (event) {
+    if (!core.allowTouch) return;
+    core._onTouchStart.call(this, event);
+};
+
+export default core;
