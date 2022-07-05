@@ -1,8 +1,8 @@
 // @ts-nocheck
-import MMO_Core from './mmo_core';
+import MMO_Core from './MMO_Core';
 
-class Core_Player  {
-
+class Core_Player {
+    // eslint-disable-next-line @typescript-eslint/ban-types
     Player: {};
     Parameters: any;
     hasInitialized: boolean;
@@ -13,15 +13,13 @@ class Core_Player  {
         this.Parameters = PluginManager.parameters('MMO_Core_Player');
         this.hasInitialized = false;
         this.isCombatInitiator = false;
-
-
     }
 
     setHp = Game_BattlerBase.prototype.setHp;
     setMp = Game_BattlerBase.prototype.setMp;
-    recoverAll = Game_BattlerBase.prototype.recoverAll
-    consumeItem = Game_Battler.prototype.consumeItem
-    gainItem = Game_Party.prototype.gainItem
+    recoverAll = Game_BattlerBase.prototype.recoverAll;
+    consumeItem = Game_Battler.prototype.consumeItem;
+    gainItem = Game_Party.prototype.gainItem;
     changeEquip = Game_Actor.prototype.changeEquip;
     initMembers = Game_CharacterBase.prototype.initMembers;
     setBattlerImage = Game_Actor.prototype.setBattlerImage;
@@ -51,7 +49,7 @@ class Core_Player  {
             armors: $gameParty['_armors'],
             weapons: $gameParty['_weapons'],
         });
-    };
+    }
 
     getPlayerPos() {
         return {
@@ -59,8 +57,7 @@ class Core_Player  {
             y: $gamePlayer['_y'],
             mapId: $gameMap['_mapId'],
         };
-    };
-
+    }
 
     updateSkin(payload) {
         if (payload.type === 'sprite') {
@@ -69,13 +66,11 @@ class Core_Player  {
         }
 
         MMO_Core.socket.emit('player_update_skin', payload);
-    };
+    }
 
     updateBusy(newState) {
         MMO_Core.socket.emit('player_update_busy', newState);
-    };
-
-
+    }
 
     async refreshStats() {
         if (this.Player['stats'] !== undefined) {
@@ -99,12 +94,10 @@ class Core_Player  {
         }
 
         // Game_Interpreter.prototype.refreshEventMiniLabel();
-    };
-
+    }
 }
 
 const MMO_Core_Player = new Core_Player();
-
 
 // ---------------------------------------
 // ---------- Native Functions Extending

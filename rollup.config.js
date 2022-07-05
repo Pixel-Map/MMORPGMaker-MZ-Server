@@ -6,11 +6,11 @@ function getMetadata(name) {
 	return readFileSync(`${__dirname}/dist/${name}_metadata.js`) + '\n' + readFileSync('header.js', 'utf-8')
 }
 
-const pluginList = ['MMO_Core', 'MMO_Core_Player']
+const pluginList = ['MMO_Core', 'MMO_Core_Player', 'MMO_Core_NPCs']
 let conf = []
 for (const plugin of pluginList) {
 	conf.push({
-		external: ["socket.io-client", "./mmo_core"],
+		external: ["socket.io-client", "./MMO_Core", "./MMO_Core_Player", "./MMO_Core_NPCs"],
 		input: `src/plugins/${plugin}.ts`,
 		output: [
 			{
@@ -32,7 +32,9 @@ for (const plugin of pluginList) {
 			externalGlobals({
 				"rmmz": "window",
 				"socket.io-client": "io",
-				"./mmo_core": "MMO_Core"
+				"./MMO_Core": "MMO_Core",
+				"./MMO_Core_Player": "MMO_Core_Player",
+				"./MMO_Core_NPCs": "MMO_Core_NPCs"
 			}),
 		]
 	})
