@@ -245,6 +245,14 @@ export default class Database {
         //     });
     }
 
+
+    async deletePocketEvent(uniqueId) {
+        const em = this.orm.em.fork();
+        const pocketEventRepository = em.getRepository(PocketEvent);
+        const event = await pocketEventRepository.findOne({uniqueId: uniqueId});
+        pocketEventRepository.removeAndFlush(event)
+    }
+
     // Begin tracking a new persistent event (i.e. an item placed on the map)
     async addPocketEvent(eventData: PocketEvent) {
         const em = this.orm.em.fork();

@@ -50,6 +50,8 @@ export default class GameWorld {
         this.fetchMaps(); // Load gamedata maps
         this.logger.info('[WORLD] GAME WORLD is ready !');
         this.logger.info('######################################');
+
+
     }
 
     // Global helpers
@@ -400,6 +402,7 @@ export default class GameWorld {
     };
 
     makeConnectedNpc = (npc, instance, pageIndex = null, initiator = 'server') => {
+
         if (!npc || !instance) return;
         // Target selected or first page to assign helpers :
         const formatedPageIndex = pageIndex && !isNaN(pageIndex) ? parseInt(pageIndex) : 0;
@@ -494,8 +497,9 @@ export default class GameWorld {
         const _generatedNpc = this.makeConnectedNpc(_npcToReplicate, _targetInstance, 0, '0');
         if (!_generatedNpc) return;
         const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
+        event.uniqueId = `Npc${uniqueIntegerId}#${this.getConnectedNpcs(event.mapId).length}@${event.mapId}`;
         Object.assign(_generatedNpc, {
-            uniqueId: `Npc${uniqueIntegerId}#${this.getConnectedNpcs(event.mapId).length}@${event.mapId}`,
+            uniqueId: event.uniqueId,
             summonId: npcSummonId,
             id: uniqueIntegerId,
             eventId: uniqueIntegerId,
@@ -510,6 +514,7 @@ export default class GameWorld {
 
         this.getNpcByUniqueId(_generatedNpc.uniqueId).x = event.x || 1;
         this.getNpcByUniqueId(_generatedNpc.uniqueId).y = event.y || 1;
+
         this.database.addPocketEvent(event);
         this.logger.info(
             `[WORLD] Spawned PocketEvent ${_generatedNpc.uniqueId} (${event.x};${event.y}) by "${_generatedNpc.initiator}"`,
@@ -529,7 +534,7 @@ export default class GameWorld {
         return this.removeConnectedNpcByUniqueId(this.spawnedUniqueIds[index]);
     };
 
-    removeConnectedNpcByUniqueId = (uniqueId) => {
+    removeConnectedNpcByUniqueId(uniqueId) {
         if (!this.getNpcByUniqueId(uniqueId) || !this.getNpcInstance(uniqueId)) return;
         const _parentInstance = this.getNpcInstance(uniqueId);
         const _npc = this.getNpcByUniqueId(uniqueId);
@@ -544,6 +549,9 @@ export default class GameWorld {
         );
         if (_spawnedIndex != -1) this.spawnedUniqueIds.splice(_spawnedIndex, 1, ''); // replace item with empty str to keep spawned index
         this.removeNode(_node);
+
+        // Remove from Database
+        this.database.deletePocketEvent(uniqueId)
 
         this.logger.debug(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`);
         this.socket.emitToAll('npcRemove', { uniqueId });

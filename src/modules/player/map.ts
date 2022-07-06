@@ -93,38 +93,42 @@ export class Map {
                 client.broadcast.to(data.id).emit('map_joined', {
                     id: client.id,
                     playerData: data.playerData,
+            });
+        });
+
+        // Refresh single player on map
+        client.on('refresh_players_on_map', function () {
+            if (client.playerData === undefined) {
+                return;
+            }
+
+            client.broadcast.to('map-' + client.playerData.mapId).emit('refresh_players_on_map', {
+                playerId: client.id,
+                playerData: client.playerData,
+            });
+        });
+
+        client.on('start_interact_npc', function (npc) {
+            if (npc && npc.uniqueId) {
+                gameworld.setNpcBusyStatus(npc.uniqueId, {
+                    id: client.playerData.id,
+                    type: 'player',
+                    since: new Date(),
                 });
+            }
+        });
+        client.on('stop_interact_npc', function (npc) {
+            if (npc && npc.uniqueId) {
+                gameworld.setNpcBusyStatus(npc.uniqueId, false);
+            }
+        });
+        client.on('event_placed', function (event: PocketEvent) {
+            gameworld.spawnPocketEvent(event);
+        });
+        client.on('event_removed', function (event) {
+            gameworld.removeConnectedNpcByUniqueId(event.uniqueId);
             });
 
-            // Refresh single player on map
-            client.on('refresh_players_on_map', function () {
-                if (client.playerData === undefined) {
-                    return;
-                }
-
-                client.broadcast.to('map-' + client.playerData.mapId).emit('refresh_players_on_map', {
-                    playerId: client.id,
-                    playerData: client.playerData,
-                });
-            });
-
-            client.on('start_interact_npc', function (npc) {
-                if (npc && npc.uniqueId) {
-                    gameworld.setNpcBusyStatus(npc.uniqueId, {
-                        id: client.playerData.id,
-                        type: 'player',
-                        since: new Date(),
-                    });
-                }
-            });
-            client.on('stop_interact_npc', function (npc) {
-                if (npc && npc.uniqueId) {
-                    gameworld.setNpcBusyStatus(npc.uniqueId, false);
-                }
-            });
-            client.on('event_placed', function (event: PocketEvent) {
-                gameworld.spawnPocketEvent(event);
-            });
         });
     }
 }
