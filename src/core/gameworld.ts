@@ -50,8 +50,6 @@ export default class GameWorld {
         this.fetchMaps(); // Load gamedata maps
         this.logger.info('[WORLD] GAME WORLD is ready !');
         this.logger.info('######################################');
-
-
     }
 
     // Global helpers
@@ -152,14 +150,22 @@ export default class GameWorld {
                 y: object.y,
                 mapId: object.mapId,
             });
-        } else _node = this.makeNode(object);
+        } else {
+            _node = this.makeNode(object);
+        }
 
-        if (_node) return this.nodes.push(_node);
+        if (_node) {
+            return this.nodes.push(_node);
+        }
     }
 
     makeNode(object) {
-        if (!object || !object.nodeType) return;
-        if (!object.uniqueId && !object.playerId) return;
+        if (!object || !object.nodeType) {
+            return;
+        }
+        if (!object.uniqueId && !object.playerId) {
+            return;
+        }
         const playerId = object.playerId || null;
         const objectUniqueId = object.uniqueId || null;
         const instanceUniqueId = object.nodeType === 'instance' ? objectUniqueId : null;
@@ -194,12 +200,16 @@ export default class GameWorld {
     }
 
     removeNode = (node) => {
-        if (!node || !node.uniqueId) return;
+        if (!node || !node.uniqueId) {
+            return;
+        }
         return this.nodes.splice(this.nodes.indexOf(this.getNode(node.uniqueId)), 1);
     };
 
     mutateNode = (node, props) => {
-        if (!node || !node.uniqueId || !this.getNode(node.uniqueId)) return;
+        if (!node || !node.uniqueId || !this.getNode(node.uniqueId)) {
+            return;
+        }
         for (const key of Object.keys(props)) {
             // Prevent assigning protected or not existing keys :
             const protectedKeys = [
@@ -239,7 +249,9 @@ export default class GameWorld {
                 }`,
             );
             this.gameMaps.push(_gameMap);
-            if (_isSync) this.instanceableMaps.push(_gameMap);
+            if (_isSync) {
+                this.instanceableMaps.push(_gameMap);
+            }
         }
 
         // For dynamic loading houses
@@ -311,7 +323,9 @@ export default class GameWorld {
     killInstance = (mapId) => {
         if (this.isMapInstanced(mapId) && !this.getInstanceByMapId(mapId).playersOnMap.length) {
             // Clean instance if no more players on it
-            for (const _npc of this.getAllNpcsByMapId(mapId)) this.removeConnectedNpcByUniqueId(_npc.uniqueId);
+            for (const _npc of this.getAllNpcsByMapId(mapId)) {
+                this.removeConnectedNpcByUniqueId(_npc.uniqueId);
+            }
             const index = this.instancedMaps.indexOf(this.getInstanceByMapId(mapId));
             const _node = this.getNodeBy('instanceUniqueId', this.instancedMaps[index].uniqueId);
             const _cleanedInstance = {
@@ -331,9 +345,15 @@ export default class GameWorld {
     };
 
     playerJoinInstance = (playerId, mapId) => {
-        if (!this.isMapInstanceable(this.getMapById(mapId)) || this.isSummonMap(this.getMapById(mapId))) return;
-        if (!this.isMapInstanced(mapId)) this.runInstance(mapId, playerId); // If instance not existing, run it before
-        if (this.getInstanceByMapId(mapId).paused) this.startInstanceLifecycle(mapId); // If paused, restart
+        if (!this.isMapInstanceable(this.getMapById(mapId)) || this.isSummonMap(this.getMapById(mapId))) {
+            return;
+        }
+        if (!this.isMapInstanced(mapId)) {
+            this.runInstance(mapId, playerId);
+        } // If instance not existing, run it before
+        if (this.getInstanceByMapId(mapId).paused) {
+            this.startInstanceLifecycle(mapId);
+        } // If paused, restart
         if (!this.getInstanceByMapId(mapId)['playersOnMap'].includes(playerId)) {
             this.getInstanceByMapId(mapId).playersOnMap.push(playerId); // Add playerId to Array
             this.logger.info('[WORLD] playerJoinInstance', this.getInstanceByMapId(mapId).uniqueId);
@@ -341,7 +361,9 @@ export default class GameWorld {
     };
 
     playerLeaveInstance = (playerId, mapId) => {
-        if (!this.isMapInstanceable(this.getMapById(mapId))) return;
+        if (!this.isMapInstanceable(this.getMapById(mapId))) {
+            return;
+        }
         if (this.getInstanceByMapId(mapId) && this.getInstanceByMapId(mapId).playersOnMap.includes(playerId)) {
             const _players = this.getInstanceByMapId(mapId).playersOnMap;
             // Remove playerId from Array
@@ -351,8 +373,9 @@ export default class GameWorld {
                 mapId,
                 JSON.stringify(this.getInstanceByMapId(mapId).playersOnMap),
             );
-            if (!this.getInstanceByMapId(mapId).playersOnMap.length)
+            if (!this.getInstanceByMapId(mapId).playersOnMap.length) {
                 this.getInstanceByMapId(mapId).lastPlayerLeftAt = new Date();
+            }
             if (!this.getInstanceByMapId(mapId).permanent) {
                 // Kill the instance after X ms
                 setTimeout(() => this.killInstance(mapId), this.getInstanceByMapId(mapId).dieAfter);
@@ -363,11 +386,15 @@ export default class GameWorld {
     /*************************************************************************************** NPC Operations */
 
     fetchConnectedNpcs = (map) => {
-        if (!map || !this.isMapInstanced(map.mapId)) return;
+        if (!map || !this.isMapInstanced(map.mapId)) {
+            return;
+        }
         for (const npc of this.getInstanceByMapId(map.mapId).events.filter((event) =>
             JSON.stringify(event).includes('<Sync>'),
         )) {
-            const _generatedNpc = this.makeConnectedNpc(npc, map);
+            const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
+            const uniqueId = `Npc${uniqueIntegerId}#${this.getConnectedNpcs(map.mapId).length}@${map.mapId}`;
+            const _generatedNpc = this.makeConnectedNpc(npc, map, null, 'server', uniqueId);
             if (_generatedNpc && this.isConnectableNpc(_generatedNpc)) {
                 this.getConnectedNpcs(map.mapId).push(_generatedNpc);
                 this.attachNode(_generatedNpc);
@@ -377,7 +404,9 @@ export default class GameWorld {
     };
 
     getAllNpcsByMapId = (mapId) => {
-        if (!mapId || !this.getMapById(mapId) || !this.getInstanceByMapId(mapId)) return;
+        if (!mapId || !this.getMapById(mapId) || !this.getInstanceByMapId(mapId)) {
+            return;
+        }
         return []
             .concat(this.getConnectedNpcs(mapId))
             .concat(
@@ -388,12 +417,16 @@ export default class GameWorld {
     };
 
     getAllPlayersByMapId = (mapId) => {
-        if (!mapId) return;
+        if (!mapId) {
+            return;
+        }
         return this.nodes.filter((node) => !!node.playerId && node.mapId === mapId);
     };
 
     getAllEntitiesByMapId = (mapId) => {
-        if (!mapId) return;
+        if (!mapId) {
+            return;
+        }
         return [].concat(this.getAllPlayersByMapId(mapId)).concat(this.getAllNpcsByMapId(mapId));
     };
 
@@ -401,9 +434,10 @@ export default class GameWorld {
         return JSON.stringify(npc).includes('<Sync>') && npc._moveType === 1;
     };
 
-    makeConnectedNpc = (npc, instance, pageIndex = null, initiator = 'server') => {
-
-        if (!npc || !instance) return;
+    makeConnectedNpc = (npc, instance, pageIndex = null, initiator = 'server', uniqueId) => {
+        if (!npc || !instance) {
+            return;
+        }
         // Target selected or first page to assign helpers :
         const formatedPageIndex = pageIndex && !isNaN(pageIndex) ? parseInt(pageIndex) : 0;
         const _instance = this.getInstanceByMapId(instance.mapId);
@@ -411,7 +445,7 @@ export default class GameWorld {
         const _npc = Object.assign({}, npc); // Prevent rewrite existing when make
         return Object.assign(_npc, {
             // Add new properties
-            uniqueId: `Npc${npc.id}#${_instance.connectedNpcs.length}@${_instance.mapId}`, // Every NPC has to be clearly differentiable
+            uniqueId: uniqueId, // Every NPC has to be clearly differentiable
             initiator: initiator || 'server',
             eventId: npc.id, // Event "ID" client-side
             absId: null, // Help to resolve ABS logic (if and when any)
@@ -441,16 +475,23 @@ export default class GameWorld {
 
     spawnNpc = (npcSummonId, coords, pageIndex, initiator) => {
         // coords = { mapId, x, y }
-        if (!coords || !coords.mapId || !coords.x || !coords.y || !this.getSummonMap()) return;
+        if (!coords || !coords.mapId || !coords.x || !coords.y || !this.getSummonMap()) {
+            return;
+        }
 
         const _npcToReplicate = this.getSummonMap().events.find(
             (npc) => npc && (npc.id === npcSummonId || (npc.summonId && npc.summonId === npcSummonId)),
         );
         const _targetInstance = this.getInstanceByMapId(coords.mapId);
-        if (!_npcToReplicate || !_targetInstance) return;
-        const _generatedNpc = this.makeConnectedNpc(_npcToReplicate, _targetInstance, pageIndex, initiator);
-        if (!_generatedNpc) return;
+        if (!_npcToReplicate || !_targetInstance) {
+            return;
+        }
         const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
+        const uniqueId = `Npc${uniqueIntegerId}#${this.getConnectedNpcs(coords.mapId).length}@${coords.mapId}`;
+        const _generatedNpc = this.makeConnectedNpc(_npcToReplicate, _targetInstance, pageIndex, initiator, uniqueId);
+        if (!_generatedNpc) {
+            return;
+        }
         Object.assign(_generatedNpc, {
             uniqueId: `Npc${uniqueIntegerId}#${this.getConnectedNpcs(coords.mapId).length}@${coords.mapId}`,
             summonId: npcSummonId,
@@ -492,17 +533,21 @@ export default class GameWorld {
 
         const _targetInstance = this.getInstanceByMapId(event.mapId);
 
-        if (!_npcToReplicate || !_targetInstance) return;
+        if (!_npcToReplicate || !_targetInstance) {
+            return;
+        }
 
-        const _generatedNpc = this.makeConnectedNpc(_npcToReplicate, _targetInstance, 0, '0');
-        if (!_generatedNpc) return;
-        const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
-        event.uniqueId = `Npc${uniqueIntegerId}#${this.getConnectedNpcs(event.mapId).length}@${event.mapId}`;
+        const _generatedNpc = this.makeConnectedNpc(_npcToReplicate, _targetInstance, 0, '0', event.uniqueId);
+        if (!_generatedNpc) {
+            return;
+        }
+        // const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
+        // event.uniqueId = `Npc${uniqueIntegerId}#${this.getConnectedNpcs(event.mapId).length}@${event.mapId}`;
         Object.assign(_generatedNpc, {
             uniqueId: event.uniqueId,
             summonId: npcSummonId,
-            id: uniqueIntegerId,
-            eventId: uniqueIntegerId,
+            id: event.id,
+            eventId: event.id,
             summonable: true,
             mapId: event.mapId,
         });
@@ -530,12 +575,16 @@ export default class GameWorld {
     };
 
     removeSpawnedNpcByIndex = (index) => {
-        if (!this.spawnedUniqueIds[index]) return;
+        if (!this.spawnedUniqueIds[index]) {
+            return;
+        }
         return this.removeConnectedNpcByUniqueId(this.spawnedUniqueIds[index]);
     };
 
-    removeConnectedNpcByUniqueId(uniqueId) {
-        if (!this.getNpcByUniqueId(uniqueId) || !this.getNpcInstance(uniqueId)) return;
+    removeConnectedNpcByUniqueId(uniqueId, permanent = false) {
+        if (!this.getNpcByUniqueId(uniqueId) || !this.getNpcInstance(uniqueId)) {
+            return;
+        }
         const _parentInstance = this.getNpcInstance(uniqueId);
         const _npc = this.getNpcByUniqueId(uniqueId);
         const _node = this.getNodeBy('npcUniqueId', _npc.uniqueId);
@@ -547,20 +596,34 @@ export default class GameWorld {
             this.getConnectedNpcs(_parentInstance.mapId).indexOf(_npc),
             1,
         );
-        if (_spawnedIndex != -1) this.spawnedUniqueIds.splice(_spawnedIndex, 1, ''); // replace item with empty str to keep spawned index
+        if (_spawnedIndex != -1) {
+            this.spawnedUniqueIds.splice(_spawnedIndex, 1, '');
+        } // replace item with empty str to keep spawned index
         this.removeNode(_node);
 
         // Remove from Database
-        this.database.deletePocketEvent(uniqueId)
+        if (permanent) {
+            this.database.deletePocketEvent(uniqueId);
+        }
 
         this.logger.debug(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`);
         this.socket.emitToAll('npcRemove', { uniqueId });
         return uniqueId;
-    };
+    }
 
     npcMoveStraight = (npc, direction, animSkip = false) => {
-        if (!npc || !this.getNpcByUniqueId(npc.uniqueId)) return;
-        this.logger.trace('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x, y: npc.y }, { direction });
+        if (!npc || !this.getNpcByUniqueId(npc.uniqueId)) {
+            return;
+        }
+        this.logger.trace(
+            '[WORLD] npcMoveStraight (1/2)',
+            npc.uniqueId,
+            {
+                x: npc.x,
+                y: npc.y,
+            },
+            { direction },
+        );
         if (this.rpgmaker._canPass(npc, direction)) {
             const _map = this.getNpcInstance(npc.uniqueId);
             this.getNpcByUniqueId(npc.uniqueId).x = this.rpgmaker._roundXWithDirection(_map.mapId, npc.x, direction);
@@ -585,13 +648,20 @@ export default class GameWorld {
                 y: this.getNpcByUniqueId(npc.uniqueId).y,
             });
             return true;
-        } else return false;
+        } else {
+            return false;
+        }
     };
 
     npcMoveTo = (npc, x, y) => {
-        if (!npc || !x || !y || !this.getNpcByUniqueId(npc.uniqueId)) this.getNpcByUniqueId(npc.uniqueId).x = x;
+        if (!npc || !x || !y || !this.getNpcByUniqueId(npc.uniqueId)) {
+            this.getNpcByUniqueId(npc.uniqueId).x = x;
+        }
         this.getNpcByUniqueId(npc.uniqueId).y = y;
-        this.mutateNode(this.getNodeBy('npcUniqueId', npc.uniqueId), { x, y });
+        this.mutateNode(this.getNodeBy('npcUniqueId', npc.uniqueId), {
+            x,
+            y,
+        });
         this.socket.emitToAll('npc_moving', {
             uniqueId: this.getNpcByUniqueId(npc.uniqueId).uniqueId,
             mapId: this.getNpcByUniqueId(npc.uniqueId).mapId,
@@ -612,24 +682,32 @@ export default class GameWorld {
     handleInstanceAction = (action, instance, currentTime) => {
         // This function will interpret/mock a game script then emit
         // an event to replicate it on every concerned player
-        if (!action || !instance || !currentTime) return;
+        if (!action || !instance || !currentTime) {
+            return;
+        }
         return;
     };
 
     setNpcBusyStatus = (uniqueId, initiator) => {
-        if (!uniqueId || !this.getNpcByUniqueId(uniqueId)) return;
+        if (!uniqueId || !this.getNpcByUniqueId(uniqueId)) {
+            return;
+        }
         this.getNpcByUniqueId(uniqueId).busy = initiator || false;
     };
 
     toggleNpcBusyStatus = (uniqueId, status) => {
-        if (!uniqueId) return;
+        if (!uniqueId) {
+            return;
+        }
         this.setNpcBusyStatus(uniqueId, status || !this.getNpcByUniqueId(uniqueId).busy);
     };
 
     handleNpcTurn = (npc, _currentTime, _cooldown) => {
         // This function will read basic NPC behavior and mock it on
         // server-side then replicate it on every concerned player
-        if (!npc || npc.busy || !npc.uniqueId || !this.getNpcByUniqueId(npc.uniqueId)) return;
+        if (!npc || npc.busy || !npc.uniqueId || !this.getNpcByUniqueId(npc.uniqueId)) {
+            return;
+        }
 
         const currentTime = _currentTime || new Date(),
             cooldown = _cooldown || Infinity;
@@ -710,8 +788,12 @@ export default class GameWorld {
 
         for (let dataIndex = 0; dataIndex < _data.length; dataIndex++) {
             // i = cell xy informations by layer
-            if (!grid[widthIndex]) grid[widthIndex] = [[]]; // if no X yet
-            if (!grid[widthIndex][heightIndex]) grid[widthIndex][heightIndex] = []; // if no Y yet
+            if (!grid[widthIndex]) {
+                grid[widthIndex] = [[]];
+            } // if no X yet
+            if (!grid[widthIndex][heightIndex]) {
+                grid[widthIndex][heightIndex] = [];
+            } // if no Y yet
             grid[widthIndex][heightIndex] = [_data[dataIndex]].concat(grid[widthIndex][heightIndex]); // Add to tile layers
 
             if (widthIndex + 1 < _width) {
@@ -721,7 +803,9 @@ export default class GameWorld {
                 heightIndex++; // next line
                 widthIndex = 0; // first cell
                 // (if next): layer first row, (else): next row
-                if (heightIndex >= _height) heightIndex = 0;
+                if (heightIndex >= _height) {
+                    heightIndex = 0;
+                }
             }
         }
         return grid;
@@ -741,7 +825,11 @@ export default class GameWorld {
                 mapId: parseInt(uniqueId.split('@')[1]),
             };
         } catch (_) {
-            return { mapId: -1, npcIndex: -1, eventId: -1 };
+            return {
+                mapId: -1,
+                npcIndex: -1,
+                eventId: -1,
+            };
         }
     };
 
