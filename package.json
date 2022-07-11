@@ -12,6 +12,7 @@
     "async": "^3.1.0",
     "axios": "^0.27.2",
     "body-parser": "^1.15.1",
+    "concurrently": "^7.2.2",
     "copyfiles": "^2.4.1",
     "cors": "^2.8.5",
     "discord.js": "^13.8.1",
@@ -58,7 +59,7 @@
     "build": "npm run clean && npm run copy-files && tsc && mz-mtdt -i src/plugins/MMO_Core.yaml -o dist/MMO_Core_metadata.js && mz-mtdt -i src/plugins/MMO_Core_Player.yaml -o dist/MMO_Core_Player_metadata.js && mz-mtdt -i src/plugins/MMO_Core_NPCs.yaml -o dist/MMO_Core_NPCs_metadata.js && rollup -c",
     "start": "node dist/mmo.js",
     "tsnode": "ts-node src/mmo.ts",
-    "dev": "nodemon src/mmo.ts",
+    "dev": "concurrently --kill-others \"nodemon src/mmo.ts\" \"rollup -c -w\"",
     "test": "jest"
   },
   "devDependencies": {
