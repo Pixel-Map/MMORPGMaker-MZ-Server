@@ -1,6 +1,7 @@
 import esbuild from 'rollup-plugin-esbuild';
 import externalGlobals from 'rollup-plugin-external-globals';
 import { readFileSync } from 'fs';
+const prettier = require('rollup-plugin-prettier');
 
 function getMetadata(name) {
     return readFileSync(`${__dirname}/dist/${name}_metadata.js`) + '\n' + readFileSync('header.js', 'utf-8');
@@ -31,6 +32,12 @@ for (const plugin of pluginList) {
                 './MMO_Core': 'MMO_Core',
                 './MMO_Core_Player': 'MMO_Core_Player',
                 './MMO_Core_NPCs': 'MMO_Core_NPCs',
+            }),
+            prettier({
+                tabWidth: 4,
+                useTabs: false,
+                singleQuote: true,
+                parser: "babel"
             }),
         ],
     });
