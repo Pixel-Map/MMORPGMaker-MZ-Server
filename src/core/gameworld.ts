@@ -518,6 +518,11 @@ export default class GameWorld {
     };
 
     spawnPocketEvent = (event: PocketEvent) => {
+        if (this.getConnectedNpcs(event.mapId).some(e => e.uniqueId == event.uniqueId)) {
+            this.logger.debug("Not spawning pocket event, it's already been spawned!")
+            return
+        }
+
         const npcSummonId = event.pItemIndex;
         const pageIndex = 0;
 
@@ -537,12 +542,15 @@ export default class GameWorld {
             return;
         }
 
+        // We want to use the event's X and Y, NOT pocket events!
+        _npcToReplicate.x = event.x
+        _npcToReplicate.y = event.y
+
         const _generatedNpc = this.makeConnectedNpc(_npcToReplicate, _targetInstance, 0, '0', event.uniqueId);
         if (!_generatedNpc) {
             return;
         }
-        // const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
-        // event.uniqueId = `Npc${uniqueIntegerId}#${this.getConnectedNpcs(event.mapId).length}@${event.mapId}`;
+
         Object.assign(_generatedNpc, {
             uniqueId: event.uniqueId,
             summonId: npcSummonId,
@@ -840,6 +848,7 @@ export default class GameWorld {
 
     reloadPersistentEvents = (mapId) => {
         this.logger.info('[POCKETEVENTS] Loading persistent pocket events');
+
         this.database.getPocketEvents().then((events) => {
             for (const event of events) {
                 this.spawnPocketEvent(event);
