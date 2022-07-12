@@ -518,9 +518,12 @@ export default class GameWorld {
     };
 
     spawnPocketEvent = (event: PocketEvent) => {
-        if (this.getConnectedNpcs(event.mapId).some(e => e.uniqueId == event.uniqueId)) {
-            this.logger.debug("Not spawning pocket event, it's already been spawned!")
-            return
+        if (
+            this.getConnectedNpcs(event.mapId) &&
+            this.getConnectedNpcs(event.mapId).some((e) => e.uniqueId == event.uniqueId)
+        ) {
+            this.logger.debug("Not spawning pocket event, it's already been spawned!");
+            return;
         }
 
         const npcSummonId = event.pItemIndex;
@@ -543,8 +546,8 @@ export default class GameWorld {
         }
 
         // We want to use the event's X and Y, NOT pocket events!
-        _npcToReplicate.x = event.x
-        _npcToReplicate.y = event.y
+        _npcToReplicate.x = event.x;
+        _npcToReplicate.y = event.y;
 
         const _generatedNpc = this.makeConnectedNpc(_npcToReplicate, _targetInstance, 0, '0', event.uniqueId);
         if (!_generatedNpc) {
@@ -558,6 +561,7 @@ export default class GameWorld {
             eventId: event.id,
             summonable: true,
             mapId: event.mapId,
+            variables: event.variables,
         });
 
         this.attachNode(_generatedNpc);

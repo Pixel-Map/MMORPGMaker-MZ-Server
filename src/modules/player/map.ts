@@ -133,6 +133,11 @@ export class Map {
             client.on('event_removed', function (event) {
                 gameworld.removeConnectedNpcByUniqueId(event.uniqueId, true);
             });
+            client.on('event_update_variables', function (event) {
+                const existingNpc = gameworld.getNpcByUniqueId(event._eventData.uniqueId);
+                existingNpc.variables = event.variables;
+                database.updateEventVariables(event);
+            });
         });
     }
 }

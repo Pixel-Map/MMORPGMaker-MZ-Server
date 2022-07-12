@@ -12,8 +12,13 @@
 import MMO_Core from './MMO_Core';
 import MMO_Core_Player from './MMO_Core_Player';
 
+export type MMO_NPC = Game_Event & {
+    variables: Record<string, unknown>;
+};
+
 class Core_NPCs {
-    npcs: {};
+    npcs: Record<string, MMO_NPC>;
+
     constructor() {
         this.npcs = {};
     }
@@ -51,8 +56,14 @@ class Core_NPCs {
             data.pages,
             data.uniqueId,
         );
+        this.npcs[data.id].variables = data.variables;
         this.npcs[data.id].setPosition(data.x, data.y);
         // console.log('MMO_Core_Npcs.Npcs[data.id]', MMO_Core_Npcs.Npcs[data.id])
+    }
+
+    updateEventVariables(event: MMO_NPC, variables: Record<string, unknown>) {
+        event.variables = variables;
+        MMO_Core.socket.emit('event_update_variables', event);
     }
 }
 
@@ -72,44 +83,43 @@ MMO_Core.socket.on('npcsFetched', async (data) => {
                 $gameMap.eraseConnectedEvent(npc.uniqueId);
             }
             MMO_Core_Npcs.addNpc(npc);
-            runOnce(npc)
+            runOnce(npc);
         });
-
     }
 });
 
 function runOnce(npc) {
     if (npc && npc.note) {
-        const command = npc.note.match('<runOnce>(.*?)<\\/runOnce>')[1]
+        const command = npc.note.match('<runOnce>(.*?)<\\/runOnce>')[1];
         // find object
-        var fn = window[command];
+        const fn = window[command];
         // is object a function?
 
         // Get the real event
-        const realEvent = $gameMap._events.find(ev => {
+        const realEvent = $gameMap._events.find((ev) => {
             if (ev && ev['_eventData']) {
                 // @ts-ignore
-                return npc.uniqueId == ev._eventData.uniqueId
+                return npc.uniqueId == ev._eventData.uniqueId;
             }
-        })
+        });
 
-        if (typeof fn === "function") {fn.apply(null, [realEvent])} else {
-            console.log("Non-existent function called")
-        };
+        if (typeof fn === 'function') {
+            // @ts-ignore
+            fn.apply(null, [realEvent]);
+        } else {
+            console.log('Non-existent function called');
+        }
     }
 }
 
 MMO_Core.socket.on('npcSpawn', async (data) => {
-
     if (!$gameMap || $gameMap._mapId !== data.mapId) {
         return;
     }
     if (data.summonable) {
         MMO_Core_Npcs.addNpc(data);
-        runOnce(data)
+        runOnce(data);
     }
-
-
 });
 
 MMO_Core.socket.on('npcRespawn', (data) => {
@@ -117,7 +127,7 @@ MMO_Core.socket.on('npcRespawn', (data) => {
         return;
     }
     MMO_Core_Npcs.addNpc(data);
-    runOnce(data)
+    runOnce(data);
     // TODO : play animation
 });
 

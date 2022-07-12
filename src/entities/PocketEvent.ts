@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { ArrayType, Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
 export class PocketEvent {
@@ -27,4 +27,10 @@ export class PocketEvent {
 
     @Property()
     id: number; // Event ID of the spawned event
+
+    @Property({
+        type: 'json',
+        default: '{}',
+    })
+    variables: JSON; // Variables on events are unique to us, they aren't normally in RPGMaker!
 }

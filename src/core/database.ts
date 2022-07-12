@@ -7,14 +7,17 @@ import pino from 'pino';
 import Logger = pino.Logger;
 import { ServerConfig } from '../entities/ServerConfig';
 import { PocketEvent } from '../entities/PocketEvent';
-import { User } from '@sentry/node';
+import { MMO_NPC } from '../plugins/MMO_Core_NPCs';
+
 const security = require('./security');
 
 export default class Database {
     logger: Logger;
+
     constructor(logger: Logger) {
         this.logger = logger;
     }
+
     private orm: MikroORM;
     public SERVER_CONFIG: ServerConfig = {
         id: 1,
@@ -89,7 +92,13 @@ export default class Database {
     async findUserById(userId) {
         const em = this.orm.em.fork();
         const userRepository = em.getRepository(Player);
-        const users = await userRepository.find({ id: userId }, { limit: 1, populate: ['skin', 'stats'] });
+        const users = await userRepository.find(
+            { id: userId },
+            {
+                limit: 1,
+                populate: ['skin', 'stats'],
+            },
+        );
         return users[0];
     }
 
@@ -245,12 +254,11 @@ export default class Database {
         //     });
     }
 
-
     async deletePocketEvent(uniqueId) {
         const em = this.orm.em.fork();
         const pocketEventRepository = em.getRepository(PocketEvent);
-        const event = await pocketEventRepository.findOne({uniqueId: uniqueId});
-        pocketEventRepository.removeAndFlush(event)
+        const event = await pocketEventRepository.findOne({ uniqueId: uniqueId });
+        pocketEventRepository.removeAndFlush(event);
     }
 
     // Begin tracking a new persistent event (i.e. an item placed on the map)
@@ -267,6 +275,17 @@ export default class Database {
         const em = this.orm.em.fork();
         const pocketEventRepository = em.getRepository(PocketEvent);
         return pocketEventRepository.findAll();
+    }
+
+    async updateEventVariables(event: MMO_NPC) {
+        this.logger.info('Updating event variables for event: ' + event._eventId);
+        const em = this.orm.em.fork();
+        const eventRepository = em.getRepository(PocketEvent);
+        // @ts-ignore
+        const dbEvent = await eventRepository.find({ uniqueId: event._eventData.uniqueId }, { limit: 1 });
+        // @ts-ignore
+        dbEvent[0].variables = event.variables;
+        await eventRepository.persistAndFlush(dbEvent[0]);
     }
 
     /// ////////////// SERVER
