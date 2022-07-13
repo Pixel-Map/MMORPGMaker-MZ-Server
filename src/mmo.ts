@@ -66,14 +66,23 @@ function cacheMiddleware() {
 app.get('/proxy/*', cacheMiddleware());
 app.options('/proxy/*', cacheMiddleware());
 
+app.use(cors());
+
 // Proxy to CORS server when request misses cache
-app.use('/proxy', expressHttpProxy(`localhost:${CORS_PROXY_PORT}`));
+app.use(
+    '/proxy',
+    expressHttpProxy(`localhost:${CORS_PROXY_PORT}`, {
+        timeout: 2000,
+        proxyErrorHandler: function (err, res, next) {
+            res.sendFile(__dirname + '/admin/placeholder.png');
+        },
+    }),
+);
 /*****************************
  STARTING THE SERVER
  *****************************/
 
 // Express settings
-app.use(cors());
 app.use('/admin/bower_components', express.static(path.join(process.cwd(), 'bower_components')));
 app.use(express.static(path.join(__dirname, 'admin')));
 app.use(bodyParser.json({ limit: '2mb' })); // to support JSON-encoded bodies
