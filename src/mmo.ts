@@ -72,7 +72,7 @@ app.use(cors());
 app.use(
     '/proxy',
     expressHttpProxy(`localhost:${CORS_PROXY_PORT}`, {
-        timeout: 2000,
+        timeout: 5000,
         proxyErrorHandler: function (err, res, next) {
             res.sendFile(__dirname + '/admin/placeholder.png');
         },
