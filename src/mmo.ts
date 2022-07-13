@@ -6,6 +6,7 @@ import MapsRouter from './routes/maps';
 import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
+
 const cors = require('cors');
 
 const app = express();
@@ -40,6 +41,33 @@ const io = require('socket.io')(server, {
 });
 
 const mmoCore = MMO_Core.getInstance();
+
+// Create CORS Anywhere server
+const corsAnywhere = require('cors-anywhere');
+const expressHttpProxy = require('express-http-proxy');
+const CORS_PROXY_PORT = 8098;
+corsAnywhere.createServer({}).listen(CORS_PROXY_PORT, () => {
+    console.log(`Internal CORS Anywhere server started at port ${CORS_PROXY_PORT}`);
+});
+
+// Register cache middleware for GET and OPTIONS verbs
+const apicache = require('apicache');
+
+function cacheMiddleware() {
+    const cacheOptions = {
+        statusCodes: { include: [200] },
+        defaultDuration: 3600000,
+        appendKey: (req, res) => req.method,
+    };
+    const cacheMiddleware = apicache.options(cacheOptions).middleware();
+    return cacheMiddleware;
+}
+
+app.get('/proxy/*', cacheMiddleware());
+app.options('/proxy/*', cacheMiddleware());
+
+// Proxy to CORS server when request misses cache
+app.use('/proxy', expressHttpProxy(`localhost:${CORS_PROXY_PORT}`));
 /*****************************
  STARTING THE SERVER
  *****************************/
@@ -106,7 +134,9 @@ try {
 process.on('SIGINT', function () {
     const security = require('./core/security');
     mmoCore.logger.info('Caught interrupt signal');
-    if (mmoCore.socket.modules.player !== undefined) mmoCore.socket.modules.player.auth.saveWorld();
+    if (mmoCore.socket.modules.player !== undefined) {
+        mmoCore.socket.modules.player.auth.saveWorld();
+    }
     security.saveTokens();
     process.exit();
 });
