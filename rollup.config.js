@@ -7,12 +7,12 @@ import generate from '@comuns-rpgmaker/plugin-metadata'
 const pluginList = ['MMO_Core', 'MMO_Core_Player', 'MMO_Core_NPCs', 'PixelMap_Yarn_Spinner'];
 
 function getMetadata(name) {
-    return readFileSync(`${__dirname}/dist/${name}_metadata.js`) + '\n' + readFileSync('header.js', 'utf-8');
+    return readFileSync(`${__dirname}/src/plugins/generated/${name}_metadata.js`) + '\n' + readFileSync('header.js', 'utf-8');
 }
 
 // Generate metadata
 for (const plugin of pluginList) {
-    generate(`src/plugins/${plugin}.yaml`, `dist/${plugin}_metadata.js`)
+    generate(`src/plugins/${plugin}.yaml`, `src/plugins/generated/${plugin}_metadata.js`)
 }
 
 let conf = [];
