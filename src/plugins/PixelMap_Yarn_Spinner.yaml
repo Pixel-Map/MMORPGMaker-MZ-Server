@@ -1,0 +1,18 @@
+target: MZ
+author: PixelMap
+description: PixelMap Yarn Spinner
+help: |-
+  This plugin adds support for Yarn Spinner dialog
+commands:
+  - name: yarn
+    text: Yarn Dialog
+    description: Attach yarn dialog to an NPC
+    args:
+      - name: Yarn File Path
+        type: text
+        text: Yarn File Path
+        description: Path to the Yarn Dialog file
+      - name: Start At
+        type: text
+        text: Start At
+        description: What node to start at?

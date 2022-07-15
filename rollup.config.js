@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 const prettier = require('rollup-plugin-prettier');
 import generate from '@comuns-rpgmaker/plugin-metadata'
 
-const pluginList = ['MMO_Core', 'MMO_Core_Player', 'MMO_Core_NPCs'];
+const pluginList = ['MMO_Core', 'MMO_Core_Player', 'MMO_Core_NPCs', 'PixelMap_Yarn_Spinner'];
 
 function getMetadata(name) {
     return readFileSync(`${__dirname}/dist/${name}_metadata.js`) + '\n' + readFileSync('header.js', 'utf-8');
@@ -39,6 +39,7 @@ for (const plugin of pluginList) {
                 './MMO_Core': 'MMO_Core',
                 './MMO_Core_Player': 'MMO_Core_Player',
                 './MMO_Core_NPCs': 'MMO_Core_NPCs',
+                'yarn-bound': 'YarnBound'
             }),
             prettier({
                 tabWidth: 4,
