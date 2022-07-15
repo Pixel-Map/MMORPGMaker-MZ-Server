@@ -2,12 +2,19 @@ import esbuild from 'rollup-plugin-esbuild';
 import externalGlobals from 'rollup-plugin-external-globals';
 import { readFileSync } from 'fs';
 const prettier = require('rollup-plugin-prettier');
+import generate from '@comuns-rpgmaker/plugin-metadata'
+
+const pluginList = ['MMO_Core', 'MMO_Core_Player', 'MMO_Core_NPCs'];
 
 function getMetadata(name) {
     return readFileSync(`${__dirname}/dist/${name}_metadata.js`) + '\n' + readFileSync('header.js', 'utf-8');
 }
 
-const pluginList = ['MMO_Core', 'MMO_Core_Player', 'MMO_Core_NPCs'];
+// Generate metadata
+for (const plugin of pluginList) {
+    generate(`src/plugins/${plugin}.yaml`, `dist/${plugin}_metadata.js`)
+}
+
 let conf = [];
 for (const plugin of pluginList) {
     conf.push({
