@@ -1,10 +1,11 @@
 import esbuild from 'rollup-plugin-esbuild';
 import externalGlobals from 'rollup-plugin-external-globals';
 import { readFileSync } from 'fs';
-const prettier = require('rollup-plugin-prettier');
-import generate from '@comuns-rpgmaker/plugin-metadata'
 
-const pluginList = ['MMO_Core', 'MMO_Core_Player', 'MMO_Core_NPCs', 'PixelMap_Yarn_Spinner'];
+const prettier = require('rollup-plugin-prettier');
+import generate from '@comuns-rpgmaker/plugin-metadata';
+
+const pluginList = ['MMO_Core', 'MMO_Core_Player', 'MMO_Core_NPCs', 'PixelMap_Yarn_Spinner', 'PixelMap_TileHouse'];
 
 function getMetadata(name) {
     return readFileSync(`${__dirname}/src/plugins/generated/${name}_metadata.js`) + '\n' + readFileSync('header.js', 'utf-8');
@@ -12,7 +13,7 @@ function getMetadata(name) {
 
 // Generate metadata
 for (const plugin of pluginList) {
-    generate(`src/plugins/${plugin}.yaml`, `src/plugins/generated/${plugin}_metadata.js`)
+    generate(`src/plugins/${plugin}.yaml`, `src/plugins/generated/${plugin}_metadata.js`);
 }
 
 let conf = [];
@@ -39,13 +40,13 @@ for (const plugin of pluginList) {
                 './MMO_Core': 'MMO_Core',
                 './MMO_Core_Player': 'MMO_Core_Player',
                 './MMO_Core_NPCs': 'MMO_Core_NPCs',
-                'yarn-bound': 'YarnBound'
+                'yarn-bound': 'YarnBound',
             }),
             prettier({
                 tabWidth: 4,
                 useTabs: false,
                 singleQuote: true,
-                parser: "babel"
+                parser: 'babel',
             }),
         ],
     });
