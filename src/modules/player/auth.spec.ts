@@ -7,11 +7,6 @@ let mmoCore;
 
 describe('User authentication', () => {
     let io, serverSocket, clientSocket;
-    process.env.DATABASE_TYPE = 'sqlite';
-    process.env.DATABASE_HOST = 'localhost';
-    process.env.DATABASE_NAME = ':memory:';
-    process.env.DATABASE_SSL = 'false';
-    process.env.GAME_PATH = '../game/';
 
     beforeAll((done) => {
         const httpServer = createServer();
@@ -35,8 +30,14 @@ describe('User authentication', () => {
     });
 
     test('should allow user to register & login successfully', (done) => {
-        clientSocket.emit('register', { username: 'testuser', password: 'testpassword' });
-        clientSocket.emit('login', { username: 'testuser', password: 'testpassword' });
+        clientSocket.emit('register', {
+            username: 'testuser',
+            password: 'testpassword',
+        });
+        clientSocket.emit('login', {
+            username: 'testuser',
+            password: 'testpassword',
+        });
         clientSocket.on('login_success', (response) => {
             done();
             const expectedPlayer = {
@@ -74,7 +75,10 @@ describe('User authentication', () => {
     });
 
     test('should NOT allow a user to re-register with same login name', (done) => {
-        clientSocket.emit('register', { username: 'testuser', password: 'testpassword' });
+        clientSocket.emit('register', {
+            username: 'testuser',
+            password: 'testpassword',
+        });
         clientSocket.on('login_error', (response) => {
             expect(response.msg).toBe('Cannot create this account.');
         });

@@ -14,8 +14,6 @@ import { Npc } from './npc';
 import { Pa } from './pa';
 import { W } from './w';
 
-const { Client, Intents } = require('discord.js');
-
 export class Messages {
     mmoCore: MMO_Core;
     io;
@@ -64,14 +62,18 @@ export class Messages {
         this.npc = new Npc(this);
         this.pa = new Pa(this);
         w: new W(this);
-        if (process.env.DISCORD_ENABLED) {
+        if (process.env.DISCORD_ENABLED.toLowerCase() === 'true') {
+            const { Client, Intents } = require('discord.js');
+
             this.discord = new Client({
                 intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
             });
             this.discord.login(process.env.DISCORD_API_TOKEN);
 
             this.discord.on('message', async (message) => {
-                if (message.author.bot) return;
+                if (message.author.bot) {
+                    return;
+                }
                 this.io.emit('new_message', {
                     username: message.author.username,
                     msg: message.content,
