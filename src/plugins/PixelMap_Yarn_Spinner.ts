@@ -50,6 +50,7 @@ function getStardewModeNode(variableStorage: VariableStorage, dialogue) {
 
     // Have we already met the character?
     if (!variableStorage.get('introduced')) {
+        variableStorage.set('introduced', true);
         return 'Start';
     }
 
