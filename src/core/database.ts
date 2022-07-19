@@ -8,6 +8,7 @@ import Logger = pino.Logger;
 import { ServerConfig } from '../entities/ServerConfig';
 import { PocketEvent } from '../entities/PocketEvent';
 import { MMO_NPC } from '../plugins/MMO_Core_NPCs';
+import { House } from '../entities/House';
 
 const security = require('./security');
 
@@ -286,6 +287,21 @@ export default class Database {
         // @ts-ignore
         dbEvent[0].variables = event.variables;
         await eventRepository.persistAndFlush(dbEvent[0]);
+    }
+
+    // House Functionality
+    async getHouse(id: number) {
+        const em = this.orm.em.fork();
+        const houseRepository = em.getRepository(House);
+        let house = await houseRepository.findOne({ id: id });
+        if (!house) {
+            house = houseRepository.create({
+                id: id,
+                owner: null,
+            });
+            houseRepository.persistAndFlush(house);
+        }
+        return house;
     }
 
     /// ////////////// SERVER

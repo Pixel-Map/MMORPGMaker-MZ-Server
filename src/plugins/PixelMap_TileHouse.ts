@@ -22,3 +22,10 @@ PluginManager.registerCommand(pluginName, 'exit', (args) => {
     }
     console.log('Error, dynamic ID not defined in PixelMap_TileHouse plugin array!');
 });
+
+export function houseInitialization(event) {
+    // If the house has an owner, hide the Realtor.
+    if ($dataMap.house.owner) {
+        event.erase();
+    }
+}

@@ -15,13 +15,21 @@ MapsRouter.get('/:name', async (req, res) => {
         mapName = `Map${zeroPad(mapId - 1000, 3)}.json`;
     }
 
-    if (!/^Map[0-9a-zA-Z]+\.json$/.test(mapName)) return res.status(400).json({ error: 'Bad Request' });
+    if (!/^Map[0-9a-zA-Z]+\.json$/.test(mapName)) {
+        return res.status(400).json({ error: 'Bad Request' });
+    }
     try {
         if (!mapId) {
             mapId = 7;
         }
         // Load dynamically from the game world!
-        res.send(mmoCore.gameworld.getMapById(mapId));
+        const map = mmoCore.gameworld.getMapById(mapId);
+        // $dataMap
+        if (mapId >= 1000) {
+            const house = await mmoCore.database.getHouse(mapId);
+            map.house = house;
+        }
+        res.send(map);
     } catch (e) {
         res.status(404).json({ error: 'Not found' });
     }
