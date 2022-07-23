@@ -14,7 +14,7 @@ PluginManager.registerCommand('PixelMap_Yarn_Spinner', 'yarn', (args) => {
     });
 });
 
-export function yarnSpinnerProcesser(prefix, dialogue, startAt) {
+export async function yarnSpinnerProcesser(prefix, dialogue, startAt) {
     const variableStorage = new VariableStorage(prefix);
 
     // Stardew Mode is heavily opinionated, and based on https://stardewvalleywiki.com/Modding:Dialogue
@@ -31,10 +31,9 @@ export function yarnSpinnerProcesser(prefix, dialogue, startAt) {
             },
         },
         variableStorage: variableStorage,
-        handleCommand: commandHandler,
     });
 
-    processYarnDialog(runner);
+    await processYarnDialog(runner);
 }
 
 function getStardewModeNode(variableStorage: VariableStorage, dialogue) {
@@ -71,11 +70,11 @@ function getRandomNodeOfType(type, dialogue) {
     return filtered[Math.floor(Math.random() * filtered.length)][0];
 }
 
-function processYarnDialog(runner: YarnBound) {
+async function processYarnDialog(runner: YarnBound) {
     const currentResult = runner.currentResult;
+    console.log(runner);
     switch (currentResult.constructor) {
         case YarnBound.TextResult:
-            console.log(currentResult);
             // Set the portrait to the name speaking
             const character = currentResult.markup.find((markup) => {
                 return markup.name === 'character';
@@ -100,34 +99,47 @@ function processYarnDialog(runner: YarnBound) {
                         '\\C[0]' +
                         currentResult.text.slice(special.position + special.length);
                 }
-
                 $gameMessage.add(wrap(text, { width: 58 }));
             }
             if (!currentResult.isDialogueEnd) {
                 if (currentResult.text.trim().length > 0) {
-                    $gameMessage.newPage();
+                    // $gameMessage.newPage();
                 }
                 runner.advance();
-                processYarnDialog(runner);
+                await processYarnDialog(runner);
             }
             break;
         case YarnBound.OptionsResult:
-            const choices = currentResult.options.map((options) => options.text);
+            const choices = []; // Because some choices may NOT be available, the index within the choices array does
+            const choiceIndexMap = {}; // not always match the index in yarn.  Because of that, we store the position
+            let arrayIndex = 0; // of each option in BOTH arrays within a dictionary, so we can reference them in
+            let yarnIndex = 0; // the callback.
+            for (const option of currentResult.options) {
+                if (option.isAvailable) {
+                    choices.push(option.text);
+                    choiceIndexMap[arrayIndex] = yarnIndex;
+                    arrayIndex = arrayIndex + 1;
+                }
+                yarnIndex = yarnIndex + 1;
+            }
+
             $gameMessage.setChoices(choices, 0, 0);
 
-            $gameMessage.setChoiceCallback((responseIndex) => {
-                runner.advance(responseIndex);
-                processYarnDialog(runner);
+            $gameMessage.setChoiceCallback(async (responseIndex) => {
+                runner.advance(choiceIndexMap[responseIndex]);
+                await processYarnDialog(runner);
             });
-            $gameMap._interpreter.setWaitMode('message');
             break;
+        case YarnBound.CommandResult:
+            await commandHandler(currentResult);
+            runner.advance();
+            await processYarnDialog(runner);
     }
 }
 
-function commandHandler(cmdResult: YarnBound.CommandResult) {
+async function commandHandler(cmdResult: YarnBound.CommandResult) {
     const splitCmd = cmdResult.command.split(' ');
     const cmd = splitCmd[0];
-
     switch (cmd) {
         case 'set_background':
             if (splitCmd.length == 2) {
@@ -135,6 +147,30 @@ function commandHandler(cmdResult: YarnBound.CommandResult) {
             } else {
                 console.log('Invalid argument number passed into set_background!');
             }
+            break;
+        case 'fade_to_black_and_back':
+            if (splitCmd.length == 2) {
+                // @ts-ignore
+                SceneManager._scene._active = false;
+                $gameScreen.startFadeOut(30);
+                await new Promise((r) => setTimeout(r, parseInt(splitCmd[1])));
+                $gameScreen.startFadeIn(30);
+                // @ts-ignore
+                SceneManager._scene._active = true;
+            } else {
+                console.log('Invalid argument number passed into fade_to_black_and_back!');
+            }
+            break;
+        case 'give_item':
+            if (splitCmd.length == 3) {
+                console.log(splitCmd);
+                $gameParty.gainItem($dataItems[splitCmd[1]], parseInt(splitCmd[2]), false);
+            } else {
+                console.log('Invalid argument number passed into give_item!');
+            }
+            break;
+        default:
+            console.log('No support yet for command: ' + cmd);
     }
 }
 
@@ -155,6 +191,9 @@ class VariableStorage {
     }
 
     get(key) {
+        if (key.startsWith('dynamic_')) {
+            return getDynamicValue(key.replace('dynamic_', ''));
+        }
         const retrievalKey = key.startsWith('global_') ? key : this.prefix + '_' + key;
 
         return this.storage.get(retrievalKey);
@@ -163,6 +202,15 @@ class VariableStorage {
     set(key, value) {
         const retrievalKey = key.startsWith('global_') ? key : this.prefix + '_' + key;
         this.storage.set(retrievalKey, value);
+    }
+}
+
+function getDynamicValue(variableName) {
+    switch (variableName) {
+        case 'playerOwnsTile':
+            console.log('Made it');
+            return true;
+            break;
     }
 }
 
