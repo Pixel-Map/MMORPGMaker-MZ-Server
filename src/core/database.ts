@@ -9,6 +9,7 @@ import { ServerConfig } from '../entities/ServerConfig';
 import { PocketEvent } from '../entities/PocketEvent';
 import { MMO_NPC } from '../plugins/MMO_Core_NPCs';
 import { House } from '../entities/House';
+import { YarnSpinnerStorage } from '../entities/YarnSpinnerStorage';
 
 const security = require('./security');
 
@@ -287,6 +288,39 @@ export default class Database {
         // @ts-ignore
         dbEvent[0].variables = event.variables;
         await eventRepository.persistAndFlush(dbEvent[0]);
+    }
+
+    async getYarnStorageVariable(playerGuid, key): Promise<YarnSpinnerStorage> {
+        const em = this.orm.em.fork();
+        const yarnRepository = em.getRepository(YarnSpinnerStorage);
+        return yarnRepository.findOne({
+            player: playerGuid,
+            key: key,
+        });
+    }
+
+    async setYarnStorageVariable(playerGuid, key, value): Promise<YarnSpinnerStorage> {
+        const em = this.orm.em.fork();
+        const yarnRepository = em.getRepository(YarnSpinnerStorage);
+        let currentVariable = await yarnRepository.findOne({
+            player: playerGuid,
+            key: key,
+        });
+        if (!currentVariable) {
+            currentVariable = yarnRepository.create({
+                player: playerGuid,
+                key: key,
+                value: value,
+            });
+        } else {
+            currentVariable = yarnRepository.create({
+                player: playerGuid,
+                key: key,
+                value: value,
+            });
+        }
+        yarnRepository.persistAndFlush(currentVariable);
+        return currentVariable;
     }
 
     // House Functionality
