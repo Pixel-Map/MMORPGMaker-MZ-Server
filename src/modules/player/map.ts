@@ -134,9 +134,14 @@ export class Map {
                 gameworld.removeConnectedNpcByUniqueId(event.uniqueId, true);
             });
             client.on('event_update_variables', function (event) {
-                const existingNpc = gameworld.getNpcByUniqueId(event._eventData.uniqueId);
-                existingNpc.variables = event.variables;
-                database.updateEventVariables(event);
+                try {
+                    const existingNpc = gameworld.getNpcByUniqueId(event._eventData.uniqueId);
+                    existingNpc.variables = event.variables;
+                    database.updateEventVariables(event);
+                } catch (error) {
+                    mmoCore.logger.error('Failed to update event variables');
+                    mmoCore.logger.error(error);
+                }
             });
         });
     }
