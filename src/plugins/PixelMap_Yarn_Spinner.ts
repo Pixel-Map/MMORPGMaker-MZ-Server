@@ -1,5 +1,7 @@
 import YarnBound from 'yarn-bound';
 import { PluginManager } from 'rmmz';
+import MMO_Core from './MMO_Core';
+import axios from 'axios';
 
 const MAX_DIALOG_EXHAUSTION = 3;
 
@@ -175,7 +177,27 @@ async function commandHandler(cmdResult: YarnBound.CommandResult) {
 }
 
 // Need to persist this to server
-const globalDialogVariableStorage = new Map();
+const SERVERSIDE_STORAGE = true;
+let globalDialogVariableStorage;
+if (SERVERSIDE_STORAGE) {
+    axios
+        .get('/user', {
+            params: {
+                ID: 12345,
+            },
+        })
+        .then(function (response) {
+            console.log(response);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+        .then(function () {
+            // always executed
+        });
+} else {
+    globalDialogVariableStorage = new Map();
+}
 
 class VariableStorage {
     storage: Map<string, unknown>;

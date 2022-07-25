@@ -62,7 +62,7 @@ export class Messages {
         this.npc = new Npc(this);
         this.pa = new Pa(this);
         w: new W(this);
-        if (process.env.DISCORD_ENABLED.toLowerCase() === 'true') {
+        if (process.env.DISCORD_ENABLED && process.env.DISCORD_ENABLED.toLowerCase() === 'true') {
             const { Client, Intents } = require('discord.js');
 
             this.discord = new Client({
