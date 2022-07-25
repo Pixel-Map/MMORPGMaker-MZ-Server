@@ -1,21 +1,35 @@
-node_modules/
-dist/
-.idea/
-.builds/
-src/admin_dev/bower_components
-rethinkdb_data/
-save/
-server/admin_dev/bower_components/
-server/admin_dev/build/
-server/*.log
-server/package-lock.json
-server/tokens.json
+# compiled output
+/dist
+/node_modules
+
+# Logs
+logs
 *.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
-tokens.json
-
+# OS
 .DS_Store
-.env
 
-yarn.lock
+# Tests
+/coverage
+/.nyc_output
 
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

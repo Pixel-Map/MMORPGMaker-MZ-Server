@@ -1,19 +1,21 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
     "emitDecoratorMetadata": true,
-    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
     "outDir": "./dist",
-    "allowJs": false,
-    "target": "es5",
-    "types": [
-      "node"
-    ],
-    "skipLibCheck": true
-  },
-  "include": [
-    "./src/**/*",
-    "node_modules/@types/jest/index.d.ts"
-  ]
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false
+  }
 }
