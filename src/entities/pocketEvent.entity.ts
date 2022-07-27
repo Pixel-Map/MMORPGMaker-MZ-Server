@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
 export class PocketEvent {
@@ -6,29 +6,29 @@ export class PocketEvent {
     Object.assign(this, init);
   }
 
-  @PrimaryColumn()
+  @PrimaryKey()
   uniqueId: string;
 
   // ActorId -- The player who placed the item
-  @Column()
+  @Property()
   playerId: string;
 
-  @Column()
+  @Property()
   pItemIndex: number; // PocketEvent Item Index
 
-  @Column()
+  @Property()
   x: number; // X location on map
 
-  @Column()
+  @Property()
   y: number; // Y location on map
 
-  @Column()
+  @Property()
   mapId: number; // ID of the map
 
-  @Column()
+  @Property()
   id: number; // Event ID of the spawned event
 
-  @Column({
+  @Property({
     type: 'json',
     default: '{}',
   })

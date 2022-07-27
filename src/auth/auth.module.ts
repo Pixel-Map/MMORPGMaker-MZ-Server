@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Player } from '../entitites/player.entity';
-import { Skin } from '../entitites/skin.entity';
-import { Stats } from '../entitites/stats.entity';
+import { AuthGateway } from './auth.gateway';
+import { HttpModule } from '@nestjs/axios';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { Player } from '../entities/player.entity';
+import { PlayerModule } from '../player/player.module';
 
-@Module({ imports: [TypeOrmModule.forFeature([Player, Skin, Stats])] })
+@Module({
+  imports: [PlayerModule, HttpModule, MikroOrmModule.forFeature([Player])],
+  providers: [AuthGateway],
+})
 export class AuthModule {}

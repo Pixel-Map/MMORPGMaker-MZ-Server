@@ -1,33 +1,40 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthController } from './auth/auth.controller';
-import { AuthService } from './auth/auth.service';
 import { LoggerModule } from 'nestjs-pino';
 import { MapController } from './map/map.controller';
 import { MapService } from './map/map.service';
-import { CoreService } from './core/core.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MapModule } from './map/map.module';
-import { CoreModule } from './core/core.module';
-import { EventsModule } from './events/events.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from './auth/auth.module';
-import { Player } from './entitites/player.entity';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { Player } from './entities/player.entity';
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
+import { PlayerModule } from './player/player.module';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      autoLoadEntities: true,
+    MikroOrmModule.forFeature([Player]),
+    MikroOrmModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        metadataProvider: TsMorphMetadataProvider,
+        entities: ['./dist/entities'],
+        entitiesTs: ['./src/entities'],
+        type: 'postgresql',
+        dbName: configService.get<string>('DATABASE_NAME'),
+        host: configService.get<string>('DATABASE_HOST'),
+        port: 5432,
+        user: configService.get<string>('DATABASE_USERNAME'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        driverOptions: {
+          connection: { ssl: false },
+        },
+      }),
+      inject: [ConfigService],
     }),
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     LoggerModule.forRoot({
       pinoHttp: {
         autoLogging: false,
@@ -36,11 +43,12 @@ import { Player } from './entitites/player.entity';
       },
     }),
     MapModule,
-    CoreModule,
-    EventsModule,
+
     AuthModule,
+
+    PlayerModule,
   ],
-  controllers: [AppController, AuthController, MapController],
-  providers: [AppService, AuthService, MapService, CoreService],
+  controllers: [AppController, MapController],
+  providers: [AppService],
 })
 export class AppModule {}

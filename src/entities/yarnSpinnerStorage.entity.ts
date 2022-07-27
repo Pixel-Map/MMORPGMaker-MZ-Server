@@ -1,6 +1,6 @@
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { Player } from './Player.entity';
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Player } from './player.entity';
 
 @Entity()
 export class YarnSpinnerStorage {
@@ -8,10 +8,10 @@ export class YarnSpinnerStorage {
     Object.assign(this, init);
   }
 
-  @PrimaryColumn()
+  @PrimaryKey()
   key: number = v4();
 
-  @Column({
+  @Property({
     type: 'json',
     default: '{}',
   })

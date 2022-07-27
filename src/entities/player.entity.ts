@@ -1,7 +1,7 @@
+import { Entity, OneToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { Skin } from './Skin.entity';
-import { Stats } from './Stats.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Skin } from './skin.entity';
+import { Stats } from './stats.entity';
 
 @Entity()
 export class Player {
@@ -9,30 +9,31 @@ export class Player {
     Object.assign(this, init);
   }
 
-  @PrimaryGeneratedColumn()
+  @PrimaryKey()
   id: string = v4();
 
-  @Column()
+  @Property()
   username: string;
 
-  @Column()
+  @Property()
   password: string;
 
-  @Column({ default: 0 })
+  @Property({ default: 0 })
   x: number;
 
-  @Column({ default: 0 })
+  @Property({ default: 0 })
   y: number;
 
-  @Column({ nullable: true })
+  @Property({ nullable: true })
   status: string;
 
-  @Column({ default: 1 })
+  @Property({ default: 1 })
   mapId: number;
 
-  @Column({ default: 0 })
+  @Property({ default: 0 })
   permission: number;
 
+  @Property({ persist: false })
   token: string; // JWT Token for Web auth
 
   @OneToOne(() => Skin, (skin) => skin.user)
@@ -41,12 +42,12 @@ export class Player {
   @OneToOne(() => Stats, (stats) => stats.user)
   stats?: Stats;
 
-  @Column({ type: 'json', default: '{}' })
+  @Property({ type: 'json', default: '{}' })
   variables: JSON;
 
-  @Column({ type: 'json', default: '{}' })
+  @Property({ type: 'json', default: '{}' })
   switches: JSON; // Yes it's actually armors.
 
-  @Column({ default: '' })
+  @Property({ default: '' })
   ens: string; // ENS nickname, only relevant for Web3 games
 }

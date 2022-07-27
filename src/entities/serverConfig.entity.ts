@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
 export class ServerConfig {
@@ -6,22 +6,22 @@ export class ServerConfig {
     Object.assign(this, init);
   }
 
-  @PrimaryColumn()
+  @PrimaryKey()
   id!: number;
 
-  @Column({})
+  @Property({})
   newPlayerDetails: NewPlayerDetailsInterface;
 
-  @Column({ type: 'json', default: '{}' })
+  @Property({ type: 'json', default: '{}' })
   globalSwitches: Map<string, boolean>;
 
-  @Column({ type: 'json', default: '{}' })
+  @Property({ type: 'json', default: '{}' })
   partySwitches: Map<string, boolean>;
 
-  @Column({ type: 'json', default: '{}' })
+  @Property({ type: 'json', default: '{}' })
   globalVariables: Map<string, any>;
 
-  @Column({ type: 'json', default: '{}' })
+  @Property({ type: 'json', default: '{}' })
   offlineMaps: Map<string, boolean>;
 }
 

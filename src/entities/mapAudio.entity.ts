@@ -1,5 +1,5 @@
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class MapAudio {
@@ -7,18 +7,18 @@ export class MapAudio {
     Object.assign(this, init);
   }
 
-  @PrimaryColumn()
+  @PrimaryKey()
   id: string = v4();
 
-  @Column({ default: '' })
+  @Property({ default: '' })
   name: string;
 
-  @Column({ default: 0 })
+  @Property({ default: 0 })
   pan: number;
 
-  @Column({ default: 100 })
+  @Property({ default: 100 })
   pitch: number;
 
-  @Column({ default: 90 })
+  @Property({ default: 90 })
   volume: number;
 }

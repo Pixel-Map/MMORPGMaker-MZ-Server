@@ -1,19 +1,13 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
-import { CoreModule } from '../core/core.module';
-import { CoreService } from '../core/core.service';
+import { MapService } from './map.service';
+import { GameMap } from './interfaces/gameMap.interface';
 
 @Controller('map')
 export class MapController {
-  constructor(private coreService: CoreService) {}
+  constructor(private mapService: MapService) {}
 
   @Get(':name')
-  getMap(@Param() params): string {
-    // import MMO_Core from '../core/mmo_core';
-    //
-    // const MapsRouter = Router();
-    // const mmoCore = MMO_Core.getInstance();
-    //
-
+  getMap(@Param() params): GameMap {
     let mapName = params.name;
 
     // Dynamic Maps are above ID 1000
@@ -33,7 +27,7 @@ export class MapController {
       }
       // Load dynamically from the game world!
 
-      const map = this.coreService.getMapById(mapId);
+      const map = this.mapService.getMapById(mapId);
       // $dataMap
       // if (mapId >= 1000) {
       //   const house = await mmoCore.database.getHouse(mapId);
