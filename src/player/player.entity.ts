@@ -1,10 +1,18 @@
-import { Entity, OneToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Entity,
+  EntityRepository,
+  EntityRepositoryType,
+  OneToOne,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { Skin } from './skin.entity';
 import { Stats } from './stats.entity';
 
-@Entity()
+@Entity({ customRepository: () => PlayerRepository })
 export class Player {
+  [EntityRepositoryType]?: PlayerRepository;
   public constructor(init?: Partial<Player>) {
     Object.assign(this, init);
   }
@@ -51,3 +59,5 @@ export class Player {
   @Property({ default: '' })
   ens: string; // ENS nickname, only relevant for Web3 games
 }
+
+export class PlayerRepository extends EntityRepository<Player> {}

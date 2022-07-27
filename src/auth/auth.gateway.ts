@@ -20,6 +20,7 @@ import { PlayerService } from '../player/player.service';
 import { Player } from '../player/player.entity';
 import { Skin } from '../player/skin.entity';
 import { Stats } from '../player/stats.entity';
+import { NewPlayerDefaults } from '../common/constants';
 
 @WebSocketGateway({
   cors: {
@@ -121,6 +122,9 @@ export class AuthGateway {
 
     // Verify user is legit
     let player = await this.findPlayer(moralisData.ethAddress);
+    if (ens) {
+      player.ens = ens;
+    }
 
     if (player == undefined) {
       await this.registerPlayer(this.playerRepo, {
@@ -130,22 +134,9 @@ export class AuthGateway {
       });
       player = await this.findPlayer(moralisData.ethAddress);
     }
+
     return player;
   }
-
-  SERVER_CONFIG = {
-    id: 1,
-    newPlayerDetails: {
-      permission: 0,
-      mapId: 1,
-      x: 5,
-      y: 5,
-    },
-    globalSwitches: new Map(),
-    partySwitches: new Map(),
-    globalVariables: new Map(),
-    offlineMaps: new Map(),
-  };
 
   @UseRequestContext()
   async findPlayer(username) {
@@ -159,17 +150,23 @@ export class AuthGateway {
 
   @UseRequestContext()
   async registerPlayer(playerRepository, userDetails) {
-    const skin = new Skin();
+    const skin = new Skin({
+      battlerName: NewPlayerDefaults.BATTLER_NAME,
+      characterIndex: NewPlayerDefaults.CHARACTER_INDEX,
+      characterName: NewPlayerDefaults.CHARACTER_NAME,
+      faceIndex: NewPlayerDefaults.FACE_INDEX,
+      faceName: NewPlayerDefaults.FACE_NAME,
+    });
     const stats = new Stats();
     const user = playerRepository.create({
       username: userDetails.username,
       password: this.hashPassword(userDetails.password.toLowerCase()),
       skin: skin,
       stats: stats,
-      mapId: this.SERVER_CONFIG.newPlayerDetails.mapId,
-      x: this.SERVER_CONFIG.newPlayerDetails.x,
-      y: this.SERVER_CONFIG.newPlayerDetails.y,
-      permission: this.SERVER_CONFIG.newPlayerDetails.permission,
+      mapId: NewPlayerDefaults.MAPID,
+      x: NewPlayerDefaults.X,
+      y: NewPlayerDefaults.Y,
+      permission: NewPlayerDefaults.PERMISSION,
     });
 
     await playerRepository.persistAndFlush(user);
@@ -177,9 +174,7 @@ export class AuthGateway {
 
   hashPassword(password) {
     const securityDetails = {
-      // eslint-disable-next-line no-irregular-whitespace
       specialSalt: 'SuperSecretKey',
-      // eslint-disable-next-line no-irregular-whitespace
       tokenPassphrase: 'keyboard cat',
     };
 
