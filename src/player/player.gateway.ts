@@ -5,13 +5,15 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UseGuards } from '@nestjs/common';
 import { GameSocket } from '../types/GameSocket';
 
 import { PlayerData } from '../map/interfaces/playerData.interface';
 import { PlayerService } from './player.service';
 import { PlayerMovementUpdateDto } from './interfaces/playerMovementUpdate.dto';
+import { WebSocketGuard } from '../guards/websocket.guard';
 
+@UseGuards(WebSocketGuard)
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -35,19 +37,12 @@ export class PlayerGateway implements OnGatewayDisconnect {
   }
 
   @SubscribeMessage('player_update_switches')
-  async playerUpdateSwitches(client: GameSocket, switches: any) {
-    if (client.playerData === undefined) {
-      return;
-    }
+  playerUpdateSwitches(client: GameSocket, switches: any) {
     client.playerData.switches = switches;
   }
 
   @SubscribeMessage('player_moving')
   async playerMoving(client: GameSocket, payload: PlayerMovementUpdateDto) {
-    if (client.playerData === undefined) {
-      return;
-    }
-
     payload.id = client.playerData.id;
     client.playerData.x = payload.x;
     client.playerData.y = payload.y;
@@ -79,10 +74,6 @@ export class PlayerGateway implements OnGatewayDisconnect {
 
   @SubscribeMessage('map_joined')
   async mapJoined(client: GameSocket, playerData: PlayerData) {
-    if (client.playerData === undefined) {
-      return;
-    }
-
     // If players already connected, let the person who just joined know who is ALREADY there
     const currentPlayersOnMap = this.playerService.getCurrentPlayersOnMap(
       playerData.mapId,
