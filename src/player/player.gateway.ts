@@ -20,6 +20,7 @@ import { PlayerMovementUpdateDto } from './interfaces/playerMovementUpdate.dto';
 @Injectable()
 export class PlayerGateway implements OnGatewayDisconnect {
   private readonly logger = new Logger(PlayerGateway.name);
+
   constructor(private readonly playerService: PlayerService) {}
 
   @WebSocketServer()
@@ -58,14 +59,6 @@ export class PlayerGateway implements OnGatewayDisconnect {
       client.playerData.y,
       client.playerData.mapId,
     );
-    // gameworld.mutateNode(
-    //   gameworld.getNodeBy('playerId', client.playerData.id),
-    //   {
-    //     x: client.playerData.x,
-    //     y: client.playerData.y,
-    //     mapId: client.playerData.mapId,
-    //   },
-    // );
 
     client.broadcast
       .to('map-' + client.playerData.mapId)

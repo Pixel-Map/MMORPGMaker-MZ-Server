@@ -12,6 +12,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Player } from './entities/player.entity';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { PlayerModule } from './player/player.module';
+import { validate } from './env.validation';
 
 @Module({
   imports: [
@@ -20,8 +21,7 @@ import { PlayerModule } from './player/player.module';
     MikroOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         metadataProvider: TsMorphMetadataProvider,
-        entities: ['./dist/entities'],
-        entitiesTs: ['./src/entities'],
+        entities: [Player],
         type: 'postgresql',
         dbName: configService.get<string>('DATABASE_NAME'),
         host: configService.get<string>('DATABASE_HOST'),
@@ -34,7 +34,10 @@ import { PlayerModule } from './player/player.module';
       }),
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      validate,
+      isGlobal: true,
+    }),
     LoggerModule.forRoot({
       pinoHttp: {
         autoLogging: false,

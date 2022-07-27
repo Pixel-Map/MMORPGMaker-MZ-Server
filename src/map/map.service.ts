@@ -6,7 +6,7 @@ import { GameMap } from './interfaces/gameMap.interface';
 export class MapService {
   private readonly logger = new Logger(MapService.name);
   private path = '../../' + process.env.GAME_PATH;
-  private data;
+  private data: [];
   private gameMaps: Map<number, GameMap>;
   private instancedMaps: any;
 
@@ -91,6 +91,7 @@ export class MapService {
     }
     this.logger.log(`[WORLD] ... Map1000-4970`);
   }
+
   getMapFromGameData(mapId, gameMap, fileName) {
     // a GameMap is a raw map file + some additional useful datas
     return Object.assign(gameMap, {
@@ -101,9 +102,11 @@ export class MapService {
       actionsOnMap: [], // Array of Objects -> Actions currently running in instance
     });
   }
+
   getMapIdByFileName(fileName) {
     return Number(fileName.slice(3));
   }
+
   getMapById(mapId) {
     return this.gameMaps.get(mapId);
   }
