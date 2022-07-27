@@ -1,13 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
-import { GameMap } from './interfaces/gameMap.interface';
 
 @Injectable()
 export class MapService {
   private readonly logger = new Logger(MapService.name);
   private path = '../../' + process.env.GAME_PATH;
   private data: [];
-  private gameMaps: Map<number, GameMap>;
+  private gameMaps: Map<number, Game_Map>;
   private instancedMaps: any;
 
   constructor() {

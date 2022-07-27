@@ -1,13 +1,12 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
 import { MapService } from './map.service';
-import { GameMap } from './interfaces/gameMap.interface';
 
 @Controller('map')
 export class MapController {
   constructor(private mapService: MapService) {}
 
   @Get(':name')
-  getMap(@Param() params): GameMap {
+  getMap(@Param() params) {
     let mapName = params.name;
 
     // Dynamic Maps are above ID 1000

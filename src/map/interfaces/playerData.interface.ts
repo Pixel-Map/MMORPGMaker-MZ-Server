@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { Skin } from '../../entities/skin.entity';
+import { Skin } from '../../player/skin.entity';
 
 export class PlayerData {
   @IsNotEmpty()

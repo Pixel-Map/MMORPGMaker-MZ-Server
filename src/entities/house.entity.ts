@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, PrimaryKey } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { Player } from './player.entity';
+import { Player } from '../player/player.entity';
 
 @Entity()
 export class HouseEntity {

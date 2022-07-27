@@ -8,19 +8,18 @@ import {
 import { lastValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
-import { Socket } from 'net';
 import { Web3Player } from './interfaces/web3player.interface';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { Skin } from '../entities/skin.entity';
-import { Stats } from '../entities/stats.entity';
 import * as crypto from 'crypto';
 import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Player } from '../entities/player.entity';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { MikroORM, UseRequestContext } from '@mikro-orm/core';
 import { GameSocket } from '../types/GameSocket';
 import { PlayerService } from '../player/player.service';
+import { Player } from '../player/player.entity';
+import { Skin } from '../player/skin.entity';
+import { Stats } from '../player/stats.entity';
 
 @WebSocketGateway({
   cors: {
@@ -30,6 +29,7 @@ import { PlayerService } from '../player/player.service';
 @Injectable()
 export class AuthGateway {
   private readonly logger = new Logger(AuthGateway.name);
+
   constructor(
     private readonly httpService: HttpService,
     @InjectRepository(Player)
@@ -50,13 +50,17 @@ export class AuthGateway {
     client.playerData = player;
     this.playerService.addConnectedPlayer(player);
     this.logger.log(client.playerData.username + ' has connected');
-    return { event: 'login_success', data: player };
+    return {
+      event: 'login_success',
+      data: player,
+    };
   }
 
   @SubscribeMessage('identity')
   async identity(@MessageBody() data: number): Promise<number> {
     return data;
   }
+
   async login(web3Player: Web3Player) {
     const data = web3Player;
     if (data.sessionToken === undefined) {
@@ -128,6 +132,7 @@ export class AuthGateway {
     }
     return player;
   }
+
   SERVER_CONFIG = {
     id: 1,
     newPlayerDetails: {
@@ -151,6 +156,7 @@ export class AuthGateway {
       },
     );
   }
+
   @UseRequestContext()
   async registerPlayer(playerRepository, userDetails) {
     const skin = new Skin();

@@ -1,5 +1,6 @@
-import { Player } from '../entities/player.entity';
 import { Socket } from 'socket.io';
+import { Player } from '../player/player.entity';
+
 export type GameSocket = Socket & {
   playerData: Player;
   id: string;

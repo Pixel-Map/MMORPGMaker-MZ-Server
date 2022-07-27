@@ -9,10 +9,10 @@ import { MapModule } from './map/map.module';
 import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from './auth/auth.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { Player } from './entities/player.entity';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { PlayerModule } from './player/player.module';
 import { validate } from './env.validation';
+import { Player } from './player/player.entity';
 
 @Module({
   imports: [

@@ -65,7 +65,6 @@ export class PlayerGateway implements OnGatewayDisconnect {
       .emit('player_moving', payload);
   }
 
-  // Refresh single player on map
   @SubscribeMessage('refresh_players_on_map')
   async refreshPlayersOnMap(client: GameSocket, data: any) {
     if (data && data.playerData) {
